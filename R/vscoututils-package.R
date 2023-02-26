@@ -8,5 +8,5 @@
 #' @importFrom dplyr %>% bind_rows mutate tibble tribble
 #' @importFrom stringr str_trim
 #' @importFrom stats setNames
-#' @importFrom utils read.csv
+#' @importFrom utils head read.csv tail
 NULL
