@@ -5,8 +5,8 @@
 #' @name vscoututils
 #' @docType package
 #' @importFrom assertthat assert_that is.flag is.string
-#' @importFrom dplyr %>% bind_rows mutate tibble tribble
+#' @importFrom dplyr %>% bind_rows case_when mutate tibble tribble
 #' @importFrom stringr str_trim
-#' @importFrom stats setNames
+#' @importFrom stats na.omit setNames
 #' @importFrom utils head read.csv tail
 NULL
