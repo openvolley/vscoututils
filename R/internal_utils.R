@@ -34,3 +34,15 @@ collect_messages <- function(msgs, msg_text, line_nums, raw_lines, severity, fat
     }
     msgs
 }
+
+time_utc <- function() {
+    nw <- Sys.time()
+    lubridate::tz(nw) <- "UTC"
+    round(nw)
+}
+
+## check a single-element function parm was provided and was not NULL or all-NA
+ok_or <- function(z, or = NA) {
+    was_missing <- eval(parse(text = paste0("missing(", deparse(substitute(z)), ")")), envir = parent.frame(n = 1))
+    if (was_missing || is.null(z) || is.na(z)) or else z
+}

@@ -8,5 +8,5 @@
 #' @importFrom dplyr %>% bind_rows case_when mutate tibble tribble
 #' @importFrom stringr str_trim
 #' @importFrom stats na.omit setNames
-#' @importFrom utils head read.csv tail
+#' @importFrom utils head packageVersion read.csv tail
 NULL
