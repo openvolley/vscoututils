@@ -53,8 +53,8 @@ dv_create_meta_match <- function(date, season, league, phase, home_away, day_num
         date <-  as.Date(NA)
         time <- NA_character_
     } else {
-        date <- as.Date(date)
         time <- tryCatch(lubridate::period(format(date, "%HH %MM %SS")), error = function(e) lubridate::as.period(NA))
+        date <- as.Date(date)
     }
     season <- if (missing(season) || is.null(season)) NA_character_ else season
     league <- if (missing(league) || is.null(league)) NA_character_ else league
