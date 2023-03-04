@@ -4,10 +4,16 @@
 \alias{dv_default_attack_combos}
 \title{Default attack combination codes table}
 \usage{
-dv_default_attack_combos(data_type = "indoor", simplified = TRUE)
+dv_default_attack_combos(
+  data_type = "indoor",
+  style = "default",
+  simplified = TRUE
+)
 }
 \arguments{
 \item{data_type}{string: "indoor", "beach"}
+
+\item{style}{string: conventions "default", "volleymetrics", "german"}
 
 \item{simplified}{logical: if \code{TRUE}, just the most common ones}
 }

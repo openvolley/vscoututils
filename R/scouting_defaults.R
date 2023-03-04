@@ -1,14 +1,19 @@
 ## various tables that define default scouting behaviour
 
+.dv_default_styles <- c("default", "volleymetrics", "german")
+
 #' Default attack combination codes table
 #' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
 #' @param simplified logical: if `TRUE`, just the most common ones
 #'
 #' @return A tibble
 #'
 #' @export
-dv_default_attack_combos <- function(data_type = "indoor", simplified = TRUE) {
+dv_default_attack_combos <- function(data_type = "indoor", style = "default", simplified = TRUE) {
+    ##data_type <- match.arg(data_type, c("indoor", "beach"))
     data_type <- match.arg(data_type, c("indoor"))
+    style <- match.arg(style, .dv_default_styles)
     out <- dplyr::tribble(~code, ~attacker_position, ~side, ~type, ~description, ~X6, ~colour, ~start_coordinate, ~set_type,
                           "CB", 2, "L", "N", "Slide next to setter", NA, 16711680, 4976, "C",
                           "CD", 2, "L", "N", "Slide away from setter", NA, 16711680, 4970, "C",
@@ -77,11 +82,14 @@ dv_default_attack_combos <- function(data_type = "indoor", simplified = TRUE) {
 #' Default setter calls table
 #'
 #' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
 #' @return A tibble
 #'
 #' @export
-dv_default_setter_calls <- function(data_type = "indoor") {
+dv_default_setter_calls <- function(data_type = "indoor", style = "default") {
     data_type <- match.arg(data_type, c("indoor"))
+    ##data_type <- match.arg(data_type, c("indoor", "beach"))
+    style <- match.arg(style, .dv_default_styles)
     dplyr::tribble(~code, ~X2, ~description, ~X4, ~colour, ~start_coordinate, ~mid_coordinate, ~end_coordinate, ~path, ~path_colour, ~X11,
                    "K1", NA, "Front Quick", NA, 16711680L, 3949L, 4454L, 4958L, NA_character_, NA_integer_, NA,
                    "K2", NA, "Back Quick", NA, 16711680L, 3864L, 4278L, 4974L, NA_character_, NA_integer_, NA,
@@ -94,10 +102,14 @@ dv_default_setter_calls <- function(data_type = "indoor") {
 
 #' Default winning symbols table
 #'
+#' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
 #' @return A tibble
 #'
 #' @export
-dv_default_winning_symbols <- function() {
+dv_default_winning_symbols <- function(data_type = "indoor", style = "default") {
+    data_type <- match.arg(data_type, c("indoor", "beach"))
+    style <- match.arg(style, .dv_default_styles)
     tribble(~skill, ~win_lose, ~code,
             "S", "L", "=",
             "S", "W", "#",
@@ -115,10 +127,14 @@ dv_default_winning_symbols <- function() {
 
 #' Default scouting (type and evaluation for each skill) table
 #'
+#' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
 #' @return A tibble
 #'
 #' @export
-dv_default_scouting_table <- function() {
+dv_default_scouting_table <- function(data_type = "indoor", style = "default") {
+    data_type <- match.arg(data_type, c("indoor", "beach"))
+    style <- match.arg(style, .dv_default_styles)
     dplyr::tribble(~skill, ~default_skill, ~skill_type, ~evaluation_code,
                    "S", FALSE, "H", "+",
                    "R", FALSE, "H", "+",
@@ -133,11 +149,13 @@ dv_default_scouting_table <- function() {
 #' Default skill_subtype (type of hit) table
 #'
 #' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
 #' @return A tibble
 #'
 #' @export
-dv_default_skill_subtypes <- function(data_type = "indoor") {
+dv_default_skill_subtypes <- function(data_type = "indoor", style = "default") {
     data_type <- match.arg(data_type, c("indoor"))
+    style <- match.arg(style, .dv_default_styles)
     dplyr::tribble(~skill, ~skill_subtype_code, ~skill_subtype,
                    "Attack", "H", "Hard spike",
                    "Attack", "P", "Soft spike/topspin",
@@ -169,11 +187,13 @@ dv_default_skill_subtypes <- function(data_type = "indoor") {
 #' Default skill_type (tempo) table
 #'
 #' @param data_type string: "indoor", "beach"
-#' @param style string: conventions "default", "volleymetrics", etc
+#' @param style string: conventions "default", "volleymetrics", "german"
 #' @return A tibble
 #'
 #' @export
 dv_default_skill_types <- function(data_type = "indoor", style = "default") {
+    data_type <- match.arg(data_type, c("indoor", "beach"))
+    style <- match.arg(style, .dv_default_styles)
     rs <- if (style == "volleymetrics") {
               ## same for beach and indoor
               tribble(~skill, ~skill_type_code, ~skill_type,
@@ -218,11 +238,13 @@ dv_default_skill_types <- function(data_type = "indoor", style = "default") {
 #' Default skill evaluation table
 #'
 #' @param data_type string: "indoor", "beach"
-#' @param style string: conventions "default", "volleymetrics", etc
+#' @param style string: conventions "default", "volleymetrics", "german"
 #' @return A tibble
 #'
 #' @export
 dv_default_skill_evaluations <- function(data_type = "indoor", style = "default") {
+    data_type <- match.arg(data_type, c("indoor", "beach"))
+    style <- match.arg(style, .dv_default_styles)
     out <- tribble(~skill, ~evaluation_code, ~evaluation,
                    "Serve", "=", "Error",
                    "Serve", "/", "Positive, no attack",
@@ -283,4 +305,130 @@ dv_default_skill_evaluations <- function(data_type = "indoor", style = "default"
                                                   TRUE ~ .data$evaluation))
     }
     out
+}
+
+
+#' Default number of players table
+#'
+#' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
+#' @return A tibble
+#'
+#' @export
+dv_default_num_players <- function(data_type = "indoor", style = "default") {
+    data_type <- match.arg(data_type, c("indoor", "beach"))
+    style <- match.arg(style, .dv_default_styles)
+    if (data_type == "beach") {
+        if (style == "default") {
+            tribble(~skill, ~num_players_code, ~num_players,
+                    "Attack", 0L, "No block",
+                    "Attack", 1L, "Line block",
+                    "Attack", 2L, "Crosscourt block",
+                    "Attack", 3L, "Block jumps to line",
+                    "Attack", 4L, "Block jumps to crosscourt",
+                    "Block", 0L, "No block",
+                    "Block", 1L, "Line block",
+                    "Block", 2L, "Crosscourt block",
+                    "Block", 3L, "Block jumps to line",
+                    "Block", 4L, "Block jumps to crosscourt")
+        } else if (style == "volleymetrics") {
+            ## TODO check
+            tribble(~skill, ~num_players_code, ~num_players,
+                    "Attack", 0L, "No block",
+                    "Attack", 1L, "Line block",
+                    "Attack", 2L, "Crosscourt block",
+                    "Attack", 3L, "Drop", ## no block, blocker defends instead
+                    "Block", 0L, "No block",
+                    "Block", 1L, "Line block",
+                    "Block", 2L, "Crosscourt block",
+                    "Block", 3L, "Drop") ## no block, blocker defends instead
+        }
+    } else {
+        ## indoor
+        tribble(~skill, ~num_players_code, ~num_players,
+                "Attack", 0L, "No block",
+                "Attack", 1L, "1 player block",
+                "Attack", 2L, "2 player block",
+                "Attack", 3L, "3 player block",
+                "Attack", 4L, "Hole block",
+                "Block", 0L, "No block",
+                "Block", 1L, "1 player block",
+                "Block", 2L, "2 player block",
+                "Block", 3L, "3 player block",
+                "Block", 4L, "Hole block",
+                "Reception", 1L, "Two players receiving, the player on left receives",
+                "Reception", 2L, "Two players receiving, the player on right receives",
+                "Reception", 3L, "Three players receiving, the player on left receives",
+                "Reception", 4L, "Three players receiving, the player in center receives",
+                "Reception", 5L, "Three players receiving, the player on right receives",
+                "Reception", 6L, "Four players receiving, the player on left receives",
+                "Reception", 7L, "Four players receiving, the player on center-left receives",
+                "Reception", 8L, "Four players receiving, the player on center-right receives",
+                "Reception", 9L, "Four players receiving, the player on right receives")
+    }
+}
+
+
+
+#' Default special codes table
+#'
+#' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
+#' @return A tibble
+#'
+#' @export
+dv_default_special_codes <- function(data_type = "indoor", style = "default") {
+    data_type <- match.arg(data_type, c("indoor", "beach"))
+    style <- match.arg(style, .dv_default_styles)
+    ## entries with NA evaluation only apply to special codes that don't meet the specific evaluation entries for the same skill
+    tribble(~skill, ~evaluation, ~special_code, ~special,
+            "Attack", "Error", "S", "Attack out - side",
+            "Attack", "Error", "O", "Attack out - long",
+            "Attack", "Error", "N", "Attack in net",
+            "Attack", "Error", "I", "Net contact",
+            "Attack", "Error", "Z", "Referee call",
+            "Attack", "Error", "A", "Antenna",
+            "Attack", "Winning attack", "S", "Block out - side",
+            "Attack", "Winning attack", "O", "Block out - long",
+            "Attack", "Winning attack", "F", "Block on floor",
+            "Attack", "Winning attack", "X", "Direct on floor",
+            "Attack", "Winning attack", "N", "Let",
+            "Attack", NA_character_, "C", "Block control",
+            "Attack", NA_character_, "N", "Let",
+            "Block", NA_character_, "S", "Ball out - side",
+            "Block", NA_character_, "O", "Ball out - long",
+            "Block", NA_character_, "F", "Ball on floor",
+            "Block", NA_character_, "X", "Between hands",
+            "Block", NA_character_, "N", "Hands - net",
+            "Block", NA_character_, "I", "Net contact",
+            "Block", NA_character_, "A", "Antenna",
+            "Block", NA_character_, "P", "No jump",
+            "Block", NA_character_, "T", "Position error",
+            "Block", NA_character_, "Z", "Referee call",
+            "Reception", NA_character_, "U", "Unplayable",
+            "Reception", NA_character_, "X", "Body error",
+            "Reception", NA_character_, "P", "Position error",
+            "Reception", NA_character_, "Z", "Referee call",
+            "Reception", NA_character_, "E", "Lack of effort",
+            "Freeball", NA_character_, "U", "Unplayable",
+            "Freeball", NA_character_, "X", "Body error",
+            "Freeball", NA_character_, "P", "Position error",
+            "Freeball", NA_character_, "Z", "Referee call",
+            "Freeball", NA_character_, "E", "Lack of effort", ## NB DV doesn't actually define 'Lack of effort' for freeball
+            "Dig", NA_character_, "U", "Unplayable",
+            "Dig", NA_character_, "X", "Body error",
+            "Dig", NA_character_, "P", "Position error",
+            "Dig", NA_character_, "Z", "Referee call",
+            "Dig", NA_character_, "F", "Ball on floor",
+            "Dig", NA_character_, "O", "Ball out",
+            "Dig", NA_character_, "E", "Lack of effort",
+            "Set", NA_character_, "U", "Cannot be hit",
+            "Set", NA_character_, "I", "Net touch",
+            "Set", NA_character_, "Z", "Referee call",
+            "Serve", "Error", "O", "Ball out - long",
+            "Serve", "Error", "L", "Ball out - left",
+            "Serve", "Error", "R", "Ball out - right",
+            "Serve", "Error", "N", "Ball in net",
+            "Serve", "Error", "Z", "Referee call",
+            "Serve", NA_character_, "N", "Let")
 }

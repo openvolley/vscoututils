@@ -9,7 +9,7 @@ dv_default_skill_types(data_type = "indoor", style = "default")
 \arguments{
 \item{data_type}{string: "indoor", "beach"}
 
-\item{style}{string: conventions "default", "volleymetrics", etc}
+\item{style}{string: conventions "default", "volleymetrics", "german"}
 }
 \value{
 A tibble

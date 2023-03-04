@@ -24,7 +24,7 @@ dv_decode_evaluation(
 \item{style}{string: "default", "volleymetrics"}
 }
 \value{
-A character vector of skill types, with a "dvmessages" attribute if any issues were found
+A character vector of evaluations, with a "dvmessages" attribute if any issues were found
 }
 \description{
 Decode evaluation codes

@@ -4,7 +4,12 @@
 \alias{dv_default_winning_symbols}
 \title{Default winning symbols table}
 \usage{
-dv_default_winning_symbols()
+dv_default_winning_symbols(data_type = "indoor", style = "default")
+}
+\arguments{
+\item{data_type}{string: "indoor", "beach"}
+
+\item{style}{string: conventions "default", "volleymetrics", "german"}
 }
 \value{
 A tibble

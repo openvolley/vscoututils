@@ -4,10 +4,12 @@
 \alias{dv_default_setter_calls}
 \title{Default setter calls table}
 \usage{
-dv_default_setter_calls(data_type = "indoor")
+dv_default_setter_calls(data_type = "indoor", style = "default")
 }
 \arguments{
 \item{data_type}{string: "indoor", "beach"}
+
+\item{style}{string: conventions "default", "volleymetrics", "german"}
 }
 \value{
 A tibble

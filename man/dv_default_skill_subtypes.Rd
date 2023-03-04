@@ -4,10 +4,12 @@
 \alias{dv_default_skill_subtypes}
 \title{Default skill_subtype (type of hit) table}
 \usage{
-dv_default_skill_subtypes(data_type = "indoor")
+dv_default_skill_subtypes(data_type = "indoor", style = "default")
 }
 \arguments{
 \item{data_type}{string: "indoor", "beach"}
+
+\item{style}{string: conventions "default", "volleymetrics", "german"}
 }
 \value{
 A tibble
