@@ -58,7 +58,7 @@ dv_create_meta_match <- function(date, season, league, phase, home_away, day_num
     }
     season <- if (missing(season) || is.null(season)) NA_character_ else season
     league <- if (missing(league) || is.null(league)) NA_character_ else league
-    phase <- if (missing(phase) || is.null(phase)) NA_character_ else phasexs
+    phase <- if (missing(phase) || is.null(phase)) NA_character_ else phase
     home_away <- if (missing(home_away) || is.null(home_away)) NA_character_ else home_away
     day_number <- if (missing(day_number) || is.null(day_number)) NA_integer_ else day_number
     match_number <- if (missing(match_number) || is.null(match_number)) NA_integer_ else match_number
