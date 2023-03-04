@@ -205,9 +205,12 @@ dv_default_skill_types <- function(data_type = "indoor", style = "default") {
                     "Attack", "F", "Fast ball attack",
                     "Attack", "N", "Slide ball attack",
                     "Attack", "O", "Other attack")
-    bind_rows(rs, rs %>% mutate(skill = "Reception"),
-              abde, abde %>% mutate(skill = "Block"),
-              abde %>% mutate(skill = "Dig"), abde %>% mutate(skill = "Set"),
+    bind_rows(rs,
+              rs %>% mutate(skill = "Reception", skill_type = paste0(.data$skill_type, " reception")),
+              abde,
+              abde %>% mutate(skill = "Block", skill_type = sub("attack", "block", .data$skill_type)),
+              abde %>% mutate(skill = "Dig", skill_type = sub("attack", "dig", .data$skill_type)),
+              abde %>% mutate(skill = "Set", skill_type = sub("attack", "set", .data$skill_type)),
               tibble(skill = "Freeball", skill_type_code = "H", skill_type = "High freeball"))
 
 }
