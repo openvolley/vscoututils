@@ -1,3 +1,5 @@
+## in these functions, issue errors for critical problems, warnings for immediate/informative messages, but issues that might matter later are prppagated into the dvmessages attribute of the returned object
+
 #' Create the `file_meta` component of a datavolley object
 #'
 #' @param file_type string: "indoor", "beach"
@@ -264,7 +266,7 @@ dv_create_meta_attack_combos <- function(code, start_zone, side = NA_character_,
     ax <- tibble(code = code, attacker_position = start_zone, side = side, type = tempo, description = description,
            X6 = NA, colour = colour, start_coordinate = start_coordinate, set_type = target_attacker, X10 = NA, X11 = NA)
     if (any(duplicated(ax$code))) {
-        warning("ignoring duplicate attack combination codes: ", paste0(unique(ax$code[duplicated(ax$code)]), collapse = ", "))
+        msgs <- c(msgs, paste0("ignoring duplicate attack combination codes: ", paste0(unique(ax$code[duplicated(ax$code)]), collapse = ", ")))
         ax <- ax[!duplicated(ax$code), , drop = FALSE]
     }
     set_dvmsg(ax, tibble(line_number = NA, message = msgs, severity = 3))
@@ -284,6 +286,7 @@ dv_create_meta_attack_combos <- function(code, start_zone, side = NA_character_,
 #' @export
 dv_create_meta_setter_calls <- function(code, description, colour = NA_character_, start_coordinate = NA_integer_, mid_coordinate = NA_integer_, end_coordinate = NA_integer_, path = NA_character_, path_colour = NA_character_) {
     assert_that(is.character(code), !any(is.na(code)))
+    msgs <- c()
     code <- toupper(code)
     if (!all(substr(code, 1, 1) %in% c("K"))) stop("attack combination codes must start with K")
     if (!all(nchar(code) == 2)) stop("setter call codes must be two letters")
@@ -301,10 +304,10 @@ dv_create_meta_setter_calls <- function(code, description, colour = NA_character
                  start_coordinate = start_coordinate, mid_coordinate = mid_coordinate, end_coordinate = end_coordinate,
                  path = path, path_colour = path_colour, X11 = NA)
     if (any(duplicated(sx$code))) {
-        warning("ignoring duplicate setter calls: ", paste0(unique(sx$code[duplicated(sx$code)]), collapse = ", "))
+        msgs <- c(msgs, paste0("ignoring duplicate setter calls: ", paste0(unique(sx$code[duplicated(sx$code)]), collapse = ", ")))
         sx <- sx[!duplicated(sx$code), , drop = FALSE]
     }
-    sx
+    set_dvmsg(sx, tibble(line_number = NA, message = msgs, severity = 3))
 }
 
 #' Create the `video` metadata component of a datavolley object
@@ -370,6 +373,7 @@ dv_create_meta <- function(match, more, comments, result, teams, players_h, play
     if (missing(result)) result <- dv_create_meta_result()
     assert_that(is.data.frame(result), nrow(result) == 1)
     assert_that(is.data.frame(teams), nrow(teams) == 2)
+    msgs <- c()
     meta <- list(match = match, more = more, comments = comments, result = result, teams = teams)
     ## players
     if (missing(players_h)) players_h <- dv_create_meta_players(tibble(lastname = character(), firstname = character(), number = integer()))
@@ -384,11 +388,11 @@ dv_create_meta <- function(match, more, comments, result, teams, players_h, play
     }
     roles <- c("libero", "outside", "opposite", "middle", "setter", "unknown")
     if (!all(players_h$role %in% roles)) {
-        warning("unknown role(s) in home players list: ", paste(setdiff(players_h$role, roles), collapse = ", "), ". Replacing with 'unknown'")
+        msgs <- c(msgs, paste0("unknown role(s) in home players list: ", paste(setdiff(players_h$role, roles), collapse = ", "), ". Replacing with 'unknown'"))
         players_h$role[!players_h$role %in% roles] <- "unknown"
     }
     if (!all(players_v$role %in% roles)) {
-        warning("unknown role(s) in visiting players list: ", paste(setdiff(players_v$role, roles), collapse = ", "), ". Replacing with 'unknown'")
+        msgs <- c(msgs, paste0("unknown role(s) in visiting players list: ", paste(setdiff(players_v$role, roles), collapse = ", "), ". Replacing with 'unknown'"))
         players_v$role[!players_v$role %in% roles] <- "unknown"
     }
     min_n_players <- if (grepl("beach", match$regulation)) 2L else 6L
@@ -401,6 +405,6 @@ dv_create_meta <- function(match, more, comments, result, teams, players_h, play
     assert_that(is.data.frame(video))
     meta <- c(meta, list(players_h = players_h, players_v = players_v, attacks = attacks, sets = setter_calls, winning_symbols = winning_symbols, video = video, filename = ""))
     meta$match_id <- dv_create_meta_match_id(meta)
-    meta
+    set_dvmsg(meta, tibble(line_number = NA, message = msgs, severity = 2))
 }
 
