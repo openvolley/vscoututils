@@ -18,7 +18,7 @@ dv_decode_skill_subtype(
 
 \item{skill_subtype_code}{character: subtype codes (H, P, etc)}
 
-\item{evaluation}{character: skill evaluations (Ace, Perfect pass, etc). Only used to make small adjustments for certain scouting styles}
+\item{evaluation}{character: skill evaluations (Ace, Perfect pass, etc). Only used to make small adjustments for certain scouting styles, which will be skipped if \code{evaluation} is not provided}
 
 \item{table}{data.frame: optional table with columns \code{skill}, \code{skill_subtype_code}, \code{skill_subtype}. If not provided, the default table for \code{data_type} and \code{style} will be used}
 

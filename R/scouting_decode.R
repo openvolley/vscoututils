@@ -69,7 +69,7 @@ dv_decode_evaluation <- function(skill, evaluation_code, table, data_type = "ind
 #'
 #' @param skill character: full skill names (Serve, Reception, etc)
 #' @param skill_subtype_code character: subtype codes (H, P, etc)
-#' @param evaluation character: skill evaluations (Ace, Perfect pass, etc). Only used to make small adjustments for certain scouting styles
+#' @param evaluation character: skill evaluations (Ace, Perfect pass, etc). Only used to make small adjustments for certain scouting styles, which will be skipped if `evaluation` is not provided
 #' @param table data.frame: optional table with columns `skill`, `skill_subtype_code`, `skill_subtype`. If not provided, the default table for `data_type` and `style` will be used
 #' @param data_type string: "indoor" or "beach"
 #' @param style string: "default", "volleymetrics"
@@ -118,7 +118,7 @@ dv_decode_skill_subtype <- function(skill, skill_subtype_code, evaluation, table
 #' dv_decode_num_players("Attack", 3, data_type = "beach")
 #'
 #' @export
-dv_decode_num_players <- function(skill, num_players_code, evaluation, table, data_type = "indoor", style = "default") {
+dv_decode_num_players <- function(skill, num_players_code, table, data_type = "indoor", style = "default") {
     if (missing(table)) table <- dv_default_num_players(data_type = data_type, style = style)
     out <- left_join(tibble(skill = skill, num_players_code = as.integer(num_players_code)), table, by = c("skill", "num_players_code")) %>%
         mutate(num_players = case_when(is.na(.data$num_players) & !is.na(.data$num_players_code) ~ paste0("Unknown ", tolower(.data$skill), " number of players ", .data$num_players_code), TRUE ~ .data$num_players)) %>% dplyr::pull(.data$num_players)
@@ -137,6 +137,7 @@ dv_decode_num_players <- function(skill, num_players_code, evaluation, table, da
 #'
 #' @param skill character: full skill names (Serve, Reception, etc)
 #' @param special_code character: special codes (Z, U, etc)
+#' @param evaluation character: skill evaluations (Ace, Perfect pass, etc)
 #' @param table data.frame: optional table with columns `skill`, `special_code`, `special`. If not provided, the default table for `data_type` and `style` will be used
 #' @param data_type string: "indoor" or "beach"
 #' @param style string: "default", "volleymetrics"

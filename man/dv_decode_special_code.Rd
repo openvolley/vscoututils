@@ -18,6 +18,8 @@ dv_decode_special_code(
 
 \item{special_code}{character: special codes (Z, U, etc)}
 
+\item{evaluation}{character: skill evaluations (Ace, Perfect pass, etc)}
+
 \item{table}{data.frame: optional table with columns \code{skill}, \code{special_code}, \code{special}. If not provided, the default table for \code{data_type} and \code{style} will be used}
 
 \item{data_type}{string: "indoor" or "beach"}

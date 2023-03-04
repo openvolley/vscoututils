@@ -7,7 +7,6 @@
 dv_decode_num_players(
   skill,
   num_players_code,
-  evaluation,
   table,
   data_type = "indoor",
   style = "default"
