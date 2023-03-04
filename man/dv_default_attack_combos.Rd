@@ -6,6 +6,11 @@
 \usage{
 dv_default_attack_combos(data_type = "indoor", simplified = TRUE)
 }
+\arguments{
+\item{data_type}{string: "indoor", "beach"}
+
+\item{simplified}{logical: if \code{TRUE}, just the most common ones}
+}
 \value{
 A tibble
 }

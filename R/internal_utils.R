@@ -46,3 +46,10 @@ ok_or <- function(z, or = NA) {
     was_missing <- eval(parse(text = paste0("missing(", deparse(substitute(z)), ")")), envir = parent.frame(n = 1))
     if (was_missing || is.null(z) || is.na(z)) or else z
 }
+
+## messages stored as attributes of an object
+get_dvmsg <- function(x) attr(x, "dvmessages", exact = TRUE)
+set_dvmsg <- function(x, msg) {
+    attr(x, "dvmessages") <- msg
+    x
+}

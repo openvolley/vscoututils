@@ -1,6 +1,8 @@
 ## various tables that define default scouting behaviour
 
 #' Default attack combination codes table
+#' @param data_type string: "indoor", "beach"
+#' @param simplified logical: if `TRUE`, just the most common ones
 #'
 #' @return A tibble
 #'
@@ -74,6 +76,7 @@ dv_default_attack_combos <- function(data_type = "indoor", simplified = TRUE) {
 
 #' Default setter calls table
 #'
+#' @param data_type string: "indoor", "beach"
 #' @return A tibble
 #'
 #' @export
@@ -116,7 +119,7 @@ dv_default_winning_symbols <- function() {
 #'
 #' @export
 dv_default_scouting_table <- function() {
-    dplyr::tribble(~skill, ~default_skill, ~tempo, ~evaluation_code,
+    dplyr::tribble(~skill, ~default_skill, ~skill_type, ~evaluation_code,
                    "S", FALSE, "H", "+",
                    "R", FALSE, "H", "+",
                    "A", FALSE, "H", "+",
@@ -124,4 +127,157 @@ dv_default_scouting_table <- function() {
                    "D", TRUE, "H", "+",
                    "E", FALSE, "H", "+",
                    "F", FALSE, "H", "+")
+}
+
+
+#' Default skill_subtype (type of hit) table
+#'
+#' @param data_type string: "indoor", "beach"
+#' @return A tibble
+#'
+#' @export
+dv_default_skill_subtypes <- function(data_type = "indoor") {
+    data_type <- match.arg(data_type, c("indoor"))
+    dplyr::tribble(~skill, ~skill_subtype_code, ~skill_subtype,
+                   "Attack", "H", "Hard spike",
+                   "Attack", "P", "Soft spike/topspin",
+                   "Attack", "T", "Tip",
+                   "Block", "A", "Block assist",
+                   "Block", "T", "Block attempt",
+                   "Block", "P", "Block on soft spike",
+                   "Reception", "L", "On left",
+                   "Reception", "R", "On right",
+                   "Reception", "W", "Low",
+                   "Reception", "O", "Overhand",
+                   "Reception", "M", "Middle line",
+                   "Set", "1", "1 hand set",
+                   "Set", "2", "2 hands set",
+                   "Set", "3", "Bump set",
+                   "Set", "4", "Other set",
+                   "Set", "5", "Underhand set",
+                   "Set", "O", "Hand set",
+                   "Set", "U", "Bump set",
+                   "Dig", "S", "On spike",
+                   "Dig", "C", "Spike cover",
+                   "Dig", "B", "After block",
+                   "Dig", "E", "Emergency",
+                   "Dig", "T", "Tip",
+                   "Dig", "P", "Soft spike")
+}
+
+
+#' Default skill_type (tempo) table
+#'
+#' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", etc
+#' @return A tibble
+#'
+#' @export
+dv_default_skill_types <- function(data_type = "indoor", style = "default") {
+    rs <- if (style == "volleymetrics") {
+              ## same for beach and indoor
+              tribble(~skill, ~skill_type_code, ~skill_type,
+                      "Serve", "Q", "Jump serve",
+                      "Serve", "M", "Jump-float serve",
+                      "Serve", "H", "Float serve", ## "float far" from the service line
+                      "Serve", "T", "Float serve") ## "float near" from the service line
+          } else if (grepl("beach", data_type)) {
+              tribble(~skill, ~skill_type_code, ~skill_type,
+                      "Serve", "Q", "Jump serve",
+                      "Serve", "T", "Jump-float serve",
+                      "Serve", "M", "Jump-float serve",
+                      "Serve", "H", "Standing serve")
+          } else {
+              ## standard indoor
+              ## also see N = hybrid
+              tribble(~skill, ~skill_type_code, ~skill_type,
+                      "Serve", "Q", "Jump serve",
+                      "Serve", "M", "Jump-float serve",
+                      "Serve", "H", "Float serve",
+                      "Serve", "T", "Topspin serve")
+          }
+    abde <- tribble(~skill, ~skill_type_code, ~skill_type,
+                    "Attack", "H", "High ball attack",
+                    "Attack", "M", "Half ball attack",
+                    "Attack", "Q", "Quick ball attack",
+                    "Attack", "T", "Head ball attack",
+                    "Attack", "U", "Super ball attack",
+                    "Attack", "F", "Fast ball attack",
+                    "Attack", "N", "Slide ball attack",
+                    "Attack", "O", "Other attack")
+    bind_rows(rs, rs %>% mutate(skill = "Reception"),
+              abde, abde %>% mutate(skill = "Block"),
+              abde %>% mutate(skill = "Dig"), abde %>% mutate(skill = "Set"),
+              tibble(skill = "Freeball", skill_type_code = "H", skill_type = "High freeball"))
+
+}
+
+#' Default skill evaluation table
+#'
+#' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", etc
+#' @return A tibble
+#'
+#' @export
+dv_default_skill_evaluations <- function(data_type = "indoor", style = "default") {
+    out <- tribble(~skill, ~evaluation_code, ~evaluation,
+                   "Serve", "=", "Error",
+                   "Serve", "/", "Positive, no attack",
+                   "Serve", "-", "Negative, opponent free attack",
+                   "Serve", "+", "Positive, opponent some attack",
+                   "Serve", "#", "Ace",
+                   "Serve", "!", "OK, no first tempo possible",
+                   "Reception", "=", "Error",
+                   "Reception", "/", "Poor, no attack",
+                   "Reception", "-", "Negative, limited attack",
+                   "Reception", "+", "Positive, attack",
+                   "Reception", "#", "Perfect pass",
+                   "Reception", "!", "OK, no first tempo possible",
+                   "Attack", "=", "Error",
+                   "Attack", "/", "Blocked",
+                   "Attack", "-", "Poor, easily dug",
+                   "Attack", "!", "Blocked for reattack",
+                   "Attack", "+", "Positive, good attack",
+                   "Attack", "#", "Winning attack",
+                   "Block", "=", "Error",
+                   "Block", "/", "Invasion",
+                   "Block", "-", "Poor, opposition to replay",
+                   "Block", "+", "Positive, block touch",
+                   "Block", "#", "Winning block",
+                   "Block", "!", "Poor, opposition to replay",
+                   "Dig", "=", "Error",
+                   "Dig", "/", "Ball directly back over net",
+                   "Dig", "-", "No structured attack possible",
+                   "Dig", "#", "Perfect dig",
+                   "Dig", "+", "Good dig",
+                   "Dig", "!", "OK, no first tempo possible",
+                   "Set", "=", "Error",
+                   "Set", "-", "Poor",
+                   "Set", "/", "Poor",
+                   "Set", "+", "Positive",
+                   "Set", "#", "Perfect",
+                   "Set", "!", "OK",
+                   "Freeball", "=", "Error",
+                   "Freeball", "/", "Poor",
+                   "Freeball", "!", "OK, no first tempo possible",
+                   "Freeball", "-", "OK, only high set possible",
+                   "Freeball", "+", "Good",
+                   "Freeball", "#", "Perfect")
+    if (style == "volleymetrics") {
+        out <- mutate(out, evaluation = case_when(
+                               .data$skill == "B" & .data$evaluation_code == "/" ~ "Poor, opposition to replay",
+                               .data$skill == "B" & .data$evaluation_code == "!" ~ "Poor, blocking team cannot recover", ## negative block, unplayable to our side
+                               .data$skill == "B" & .data$evaluation_code == "-" ~ "Poor block", ## negative block touch, either back to opposition or poor on our side
+                               .data$skill == "B" & .data$evaluation_code == "+" ~ "Positive block", ## positive block touch, either to our defense or difficult for opposition
+                               .data$skill == "D" & .data$evaluation_code == "/" ~ "Positive block cover", ## D/ is block cover that gives attacking team a chance to re-attack
+                               .data$skill == "D" & .data$evaluation_code == "!" ~ "Poor block cover", ## block cover that does not give attacking team a chance to re-attack or is an error
+                               .data$skill == "E" & .data$evaluation_code == "/" ~ "Error (reach over net)", ## E/ is a reach
+                               TRUE ~ .data$evaluation))
+    } else if (style == "german") {
+        ## swap B= Error and B/ Invasion
+        out <- mutate(out, evaluation = case_when(.data$skill=="B" & .data$evaluation_code == "/" ~ "Error",
+                                                  .data$skill=="B" & .data$evaluation_code == "=" ~ "Invasion",
+                                                  TRUE ~ .data$evaluation))
+    }
+    out
 }

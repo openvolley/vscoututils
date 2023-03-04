@@ -6,6 +6,9 @@
 \usage{
 dv_default_setter_calls(data_type = "indoor")
 }
+\arguments{
+\item{data_type}{string: "indoor", "beach"}
+}
 \value{
 A tibble
 }

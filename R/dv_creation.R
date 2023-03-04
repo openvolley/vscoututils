@@ -235,12 +235,18 @@ make_player_id <- function(lastname, firstname) toupper(paste0(substr(lastname, 
 #' @export
 dv_create_meta_attack_combos <- function(code, start_zone, side = NA_character_, tempo, description, colour = NA_character_, start_coordinate = NA_integer_, target_attacker) {
     assert_that(is.character(code), !any(is.na(code)))
+    msgs <- c()
     code <- toupper(code)
     if (!all(substr(code, 1, 1) %in% c("C", "I", "J", "I", "L", "P", "V", "W", "X", "Y", "Z"))) stop("attack combination codes must start with C, I, J, I, L, P, V, W, X, Y, or Z")
     if (!all(nchar(code) == 2)) stop("attack combination codes must be two letters")
     start_zone <- as.integer(start_zone)
     assert_that(!any(is.na(start_zone)), all(start_zone %in% 1:9))
-    if (any(start_zone %in% c(5, 6, 1))) warning("start zones of 5, 6, and 1 are legal but unusual for attacks, are you sure you did not mean 7, 8, or 9?")
+    unusual <- sort(unique(start_zone[start_zone %in% c(5, 6, 1)]))
+    if (length(unusual) > 0) {
+        repl <- c(9, 0, 0, 0, 7, 8)[unusual]
+        m <- length(unusual) > 1
+        msgs <- c(msgs, paste0("start zone", if (m) "s", " ", paste(unusual, collapse = ", "), " ", if (m) "are" else "is", " legal but unusual for attacks, are you sure you did not mean ", paste(repl, collapse = ", "), "?"))
+    }
     assert_that(is.character(side))
     side <- toupper(side)
     assert_that(all(side %in% c("R", "L", "C", NA_character_))) ## allow NA pending further checking
@@ -261,7 +267,7 @@ dv_create_meta_attack_combos <- function(code, start_zone, side = NA_character_,
         warning("ignoring duplicate attack combination codes: ", paste0(unique(ax$code[duplicated(ax$code)]), collapse = ", "))
         ax <- ax[!duplicated(ax$code), , drop = FALSE]
     }
-    ax
+    set_dvmsg(ax, tibble(line_number = NA, message = msgs, severity = 3))
 }
 
 #' Create the `sets` (setter calls) metadata component of a datavolley object
