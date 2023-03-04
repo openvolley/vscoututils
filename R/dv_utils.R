@@ -81,10 +81,6 @@ dv_update_meta <- function(x) {
                 pl_row <- which(x$meta$players_h$number == home_starting_lineup[j])
                 if (length(pl_row) == 1) x$meta$players_h[[paste0("starting_position_set", si)]][pl_row] <- as.character(j)
             }
-            ## subs
-            all_home_pl <- unique(na.omit(as.numeric(unlist(x$plays[which(x$plays$set_number == si & !grepl(">LUp", x$plays$code, ignore.case = TRUE)), paste0("home_p", pseq)]))))
-            home_subs <- na.omit(setdiff(all_home_pl, home_starting_lineup))
-            x$meta$players_h[[paste0("starting_position_set", si)]][x$meta$players_h$number %in% home_subs] <- "*"
             ## visiting team
             visiting_starting_lineup <- as.numeric(x$plays[final_lup_row, paste0("visiting_p", pseq)])
             if (!paste0("starting_position_set", si) %in% names(x$meta$players_v)) x$meta$players_v[[paste0("starting_position_set", si)]] <- NA_character_
@@ -92,11 +88,18 @@ dv_update_meta <- function(x) {
                 pl_row <- which(x$meta$players_v$number == visiting_starting_lineup[j])
                 if (length(pl_row) == 1) x$meta$players_v[[paste0("starting_position_set", si)]][pl_row] <- as.character(j)
             }
-            ## subs
-            all_visiting_pl <- unique(na.omit(as.numeric(unlist(x$plays[which(x$plays$set_number == si & !grepl(">LUp", x$plays$code, ignore.case = TRUE)), paste0("visiting_p", pseq)]))))
-            visiting_subs <- na.omit(setdiff(all_visiting_pl, visiting_starting_lineup))
-            x$meta$players_v[[paste0("starting_position_set", si)]][x$meta$players_v$number %in% visiting_subs] <- "*"
         }
+        ## subs
+        all_home_pl <- unique(na.omit(as.numeric(unlist(x$plays[which(x$plays$set_number == si & !grepl(">LUp", x$plays$code, ignore.case = TRUE)), paste0("home_p", pseq)]))))
+        ## also any players recorded making a play, because liberos won't appear in the home_pX lineup columns
+        all_home_pl <- unique(c(all_home_pl, c(unique(na.omit(x$plays$player_number[which(!is.na(x$plays$skill) & x$plays$team == x$plays$home_team & x$plays$set_number == si)])))))
+        home_subs <- na.omit(setdiff(all_home_pl, home_starting_lineup))
+        x$meta$players_h[[paste0("starting_position_set", si)]][x$meta$players_h$number %in% home_subs] <- "*"
+        ## visiting
+        all_visiting_pl <- unique(na.omit(as.numeric(unlist(x$plays[which(x$plays$set_number == si & !grepl(">LUp", x$plays$code, ignore.case = TRUE)), paste0("visiting_p", pseq)]))))
+        all_visiting_pl <- unique(c(all_visiting_pl, c(unique(na.omit(x$plays$player_number[which(!is.na(x$plays$skill) & x$plays$team == x$plays$visiting_team & x$plays$set_number == si)])))))
+        visiting_subs <- na.omit(setdiff(all_visiting_pl, visiting_starting_lineup))
+        x$meta$players_v[[paste0("starting_position_set", si)]][x$meta$players_v$number %in% visiting_subs] <- "*"
     }
     x
 }
