@@ -71,7 +71,7 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
             }
         }
         ## add the new codes
-        if (length(newcodes) > 0) rx <- bind_rows(rx, rx[rep(1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point = FALSE, code = newcodes))
+        if (length(newcodes) > 0) rx <- bind_rows(rx, rx[rep(1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point = FALSE, timeout = FALSE, substitution = FALSE, code = newcodes))
     } else if (is_sc) {
         ## score correction, add pc rows if needed, there may need to be more than one
         ## also discard the existing point code, because it will need to be re-created in sequence here
@@ -102,7 +102,7 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
         ## if a point is being subtracted, it is still given a # green code ("point win") for that team, which seems a bit silly
         temp_point_ids <- rx$point_id
         if (n_adj > 1) temp_point_ids <- temp_point_ids + rep(seq_len(abs(hts_delta) + abs(vts_delta)), each = 3) / (n_adj + 1L)
-        rx <- rx[rep(1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point_id = temp_point_ids, point = substr(newcodes, 2, 2) == "p", code = newcodes, home_team_score = newscores_h, visiting_team_score = newscores_v)
+        rx <- rx[rep(1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point_id = temp_point_ids, point = substr(newcodes, 2, 2) == "p", code = newcodes, home_team_score = newscores_h, visiting_team_score = newscores_v, substitution = FALSE, timeout = FALSE)
     } else if (is_point) {
         ## add green codes
         if (!all(rx$team %in% c("a", "*"))) {
@@ -121,7 +121,7 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
         if (length(codes2) > nrow(rx)) {
             newcodes <- codes2[seq(from = nrow(rx), to = length(codes2) - 1L, by = 1L)] ## add these codes
             rx <- bind_rows(head(rx, -1), ## not the last row
-                            rx[rep(nrow(rx) - 1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point = FALSE, code = newcodes),
+                            rx[rep(nrow(rx) - 1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point = FALSE, timeout = FALSE, substitution = FALSE, code = newcodes),
                             tail(rx, 1))
         }
     }
