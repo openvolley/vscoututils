@@ -172,3 +172,53 @@ dv_green_codes <- function(code, meta) {
     }
     c(head(code, -1), green_codes, tail(code, 1))
 }
+
+#' Insert technical timeouts
+#'
+#' @param x: datavolleyplays: the plays component of a datavolley object as returned by [dv_read()]
+#' @param at list: (optional) a two-element list can be supplied, giving the scores at which technical timeouts will be inserted for sets 1--4, and set 5 or golden sets. If not provided, technical timeouts are inserted at points 8 and 16 of sets 1--4 (for indoor files) or when the team scores sum to 21 in sets 1--2 (beach)
+#' @param data_type string: "indoor" or "beach". If not provided, a guess will be made as to whether `x` is beach or indoor data
+#' @return A modified copy of `x`
+#'
+#' @export
+dv_insert_technical_timeouts <- function(x, at, data_type) {
+    if (missing(data_type)) data_type <- dv_guess_data_type(x)
+    if (!grepl("indoor|beach", data_type)) stop("unrecognized data_type: ", data_type)
+    if (missing(at)) {
+        at <- if (grepl("beach", data_type)) list(function(s1, s2) (s1 + s2) == 21, NULL) else list(c(8, 16), NULL)
+    } else {
+        at <- list(NULL, NULL)
+    }
+    pseq <- if (grepl("beach", data_type)) 1:2 else 1:6
+    set_sets <- if (grepl("beach", data_type)) list(1:2, 3) else list(1:4, 5)
+    for (si in 1:2) {
+        if (!is.null(at[[si]])) {
+            if (is.numeric(at[[si]])) {
+                ## find technical timeouts at e.g. points 8 and 16 in sets 1-4
+                for (this_set in set_sets[[si]]) {
+                    for (thisp in at[[si]]) {
+                        idx <- which((x$home_score_start_of_point == thisp | x$visiting_score_start_of_point == thisp) & x$set_number == this_set)
+                        if (length(idx) > 0) {
+                            idx <- idx[1]
+                            x <- bind_rows(x[seq_len(idx - 1L), ],
+                                           x[idx, c("set_number", "home_team_score", "visiting_team_score", "home_setter_position", "visiting_setter_position", paste0("home_p", pseq), paste0("visiting_p", pseq), "home_score_start_of_point", "visiting_score_start_of_point")] %>% mutate(skill = "Technical timeout", point_id = x$point_id[idx] - 0.5, timeout = TRUE, point = FALSE, end_of_set = FALSE, substitution = FALSE),
+                                           x[setdiff(seq_len(nrow(x)), seq_len(idx - 1L)), ])
+                        }
+                    }
+                }
+            } else if (is.function(at[[si]])) {
+                ## function that is TRUE when a TTO should occur. Note this only allows one such TTO per set
+                for (this_set in set_sets[[si]]) {
+                    idx <- which(at[[si]](x$home_score_start_of_point, x$visiting_score_start_of_point) & x$set_number == this_set)
+                    if (length(idx) > 0) {
+                        idx <- idx[1]
+                        x <- bind_rows(x[seq_len(idx - 1L), ],
+                                       x[idx, c("set_number", "home_team_score", "visiting_team_score", "home_setter_position", "visiting_setter_position", "home_p1", "home_p2", "home_p3", "home_p", "home_p5", "home_p6", "visiting_p1", "visiting_p2", "visiting_p3", "visiting_p4", "visiting_p5", "visiting_p6", "home_score_start_of_point", "visiting_score_start_of_point")] %>% mutate(skill = "Technical timeout", point_id = x$point_id[idx] - 0.5, timeout = TRUE, point = FALSE, end_of_set = FALSE, substitution = FALSE),
+                                       x[setdiff(seq_len(nrow(x)), seq_len(idx - 1L)), ])
+                    }
+                }
+            }
+        }
+    }
+    x
+}

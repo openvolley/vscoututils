@@ -64,3 +64,31 @@ lead0 <- function(x, width = 2, pad = "0", na = NULL) {
     out[!naidx] <- stringr::str_pad(as.numeric(x[!naidx]), width = width, pad = pad)
     out
 }
+
+dv_guess_data_type <- function(x) {
+    tryCatch({
+        if ("meta" %in% names(x)) {
+            ## is datavolley object
+            if (isTRUE(grepl("indoor", x$meta$match$regulation))) {
+                "indoor"
+            } else if (isTRUE(grepl("beach", x$meta$match$regulation))) {
+                "beach"
+            }
+        } else if ("file_meta" %in% names(x)) {
+            if (isTRUE(grepl("indoor", x$file_meta$file_type))) {
+                "indoor"
+            } else if (isTRUE(grepl("beach", x$file_meta$file_type))) {
+                "beach"
+            }
+        } else if ("home_player_id1" %in% names(x)) {
+            ## plays dataframe
+            if (!"home_player_id3" %in% names(x)) {
+                if ("eventgrade" %in% names(x)) "perana_beach" else "beach"
+            } else {
+                if ("eventgrade" %in% names(x)) "perana_indoor" else "indoor"
+            }
+        } else {
+            NA_character_
+        }
+    }, error = function(e) NA_character_)
+}
