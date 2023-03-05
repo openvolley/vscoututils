@@ -53,3 +53,14 @@ set_dvmsg <- function(x, msg) {
     attr(x, "dvmessages") <- msg
     x
 }
+
+lead0 <- function(x, width = 2, pad = "0", na = NULL) {
+    out <- character(length(x))
+    naidx <- rep(FALSE, length(x))
+    if (!is.null(na)) {
+        naidx <- is.na(x) | !nzchar(x)
+        out[naidx] <- na
+    }
+    out[!naidx] <- stringr::str_pad(as.numeric(x[!naidx]), width = width, pad = pad)
+    out
+}

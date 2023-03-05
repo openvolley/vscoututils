@@ -15,7 +15,7 @@ dv_default_attack_combos(
 
 \item{style}{string: conventions "default", "volleymetrics", "german"}
 
-\item{simplified}{logical: if \code{TRUE}, just the most common ones}
+\item{simplified}{logical: if \code{TRUE}, just the most common ones (indoor only)}
 }
 \value{
 A tibble

@@ -1,5 +1,136 @@
 ## functions for building and working with scout files
 
+#' Expand scouted rally codes
+#'
+#' * insert dummy rally rows for score corrections. Note that this will not adjust the setter position in the dummy rows nor insert intermediate setter positions (but will insert one setter position code per team at the start of the returned data frame, if needed)
+#' * ensure that the substitution code is a setter substitution (*P or aP) if it was the on-court setter that was substituted
+#' * insert the setter position codes at the start of the rally. These should not be inserted on the first point of a set, in that situation they should be in the >LUp codes - so for the first point, make sure that the `last_home_setter_position` and `last_visiting_setter_position` are passed as their starting values)
+#'
+#' @param rx data.frame: with at least the columns:
+#' * point_id, code, team ("*" or "a"), point, substitution, timeout, home_setter_position, visiting_setter_position
+#' * home_team_score, visiting_team_score (scores at the end of the rally)
+#' and optional columns:
+#' * player_number, skill, skill_type_code, evaluation_code (used to rebuild the codes before calling [dv_green_codes()]
+#' * player_out (outgoing sub player - used to check if the setter has been substituted if provided)
+#' @param last_home_setter_position,last_visiting_setter_position integer: home and visiting setter positions in the previous rally
+#' @param last_home_team_score,last_visiting_team_score integer: home and visiting team scores at the end of the previous rally
+#' @param keepcols character: names of the columns in `rx` to keep, when inserting new rows. Values in these columns will be copied from an adjacent row. If `keepcols` is not provided, a guess will be made
+#' @param meta list: meta component from a datavolley object
+#'
+#' @return `rx` potentially with additional rows inserted. Note that the added rows might have fractional `point_id` values, in which case you will need to renumber all `point_id`s in the match to integers afterwards
+#'
+#' @export
+dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_setter_position, last_home_team_score, last_visiting_team_score, keepcols, meta) {
+    assert_that(is.data.frame(rx))
+    if (nrow(rx) < 1) return(rx)
+    req <- c("point_id", "code", "team", "point", "substitution", "timeout", "home_setter_position", "visiting_setter_position", "home_team_score", "visiting_team_score")
+    if (!all(req %in% names(rx))) stop("rx is missing required columns: ", paste0(setdiff(req, names(rx)), collapse = ", "))
+    opt1 <- c("player_number", "skill", "skill_type_code", "evaluation_code")
+    if (any(opt1 %in% names(rx)) && !all(opt1 %in% names(rx))) {
+        warning("rx has some but not all required columns to rebuild the codes to pass to dv_green_codes, so using existing `code` column (missing columns: ", paste0(setdiff(opt1, names(rx)), collapse = ","), ")")
+    }
+    if (missing(keepcols)) keepcols <- c("point_id", "time", "video_time", "home_team_score", "visiting_team_score", "point_won_by", "set_number",
+                                         "home_setter_position", "visiting_setter_position", "home_p1", "home_p2", "home_p3", "home_p4", "home_p5", "home_p6",
+                                         "visiting_p1", "visiting_p2", "visiting_p3", "visiting_p4", "visiting_p5", "visiting_p6")
+    assert_that(is.character(keepcols))
+    keepcols <- intersect(names(rx), keepcols)
+    is_sub <- is_to <- is_sc <- is_point <- FALSE
+    if (any(rx$substitution)) {
+        stopifnot(nrow(rx) == 1)
+        is_sub <- TRUE
+    } else if (any(rx$timeout)) {
+        stopifnot(nrow(rx) == 1)
+        is_to <- TRUE
+    } else if (nrow(rx) == 1 && isTRUE(rx$point)) {
+        ## `point` indicates that the score changed, either through a genuine rally or via a score correction
+        ## single row is score correction
+        is_sc <- TRUE
+    } else if (any(rx$point)) {
+        ## otherwise rally with point
+        is_point <- TRUE
+    }
+    ## if this was this a substitution, did the setter get substituted?
+    if (is_sub && "player_out" %in% names(rx)) {
+        if (rx$team %eq% "*") {
+            setter_num <- tryCatch(rx[[paste0("home_p", rx$home_setter_position)]], error = NA_integer_)
+        } else if (rx$team %eq% "a") {
+            setter_num <- tryCatch(rx[[paste0("visiting_p", rx$visiting_setter_position)]], error = NA_integer_)
+        } else {
+            warning("sub for unknown team")
+        }
+        if (is.na(setter_num)) {
+            warning("substitution but unknown setter number, so not checking if setter was substituted")
+        } else {
+            if (rx$player_out == setter_num && grepl("^[a\\*]c", rx$code)) substr(rx$code, 2, 2) <- "P" ## make the sub code a setter sub
+        }
+    } else if (is_sc) {
+        ## score correction, add pc rows if needed, there may need to be more than one
+        ## also discard the existing point code, because it will need to be re-created in sequence here
+        last_scores <- c(last_home_team_score, last_visiting_team_score)
+        hts_delta <- rx$home_team_score - last_scores[1] ## change in home team score
+        vts_delta <- rx$visiting_team_score - last_scores[2] ## change in visiting team score
+        n_adj <- abs(hts_delta) + abs(vts_delta) ## the number of score adjustments we'll insert
+        newcodes <- newscores_h <- newscores_v <- c()
+        ## note that we don't try and keep track of setter positions through this and enter the appropriate *z/az codes. Just enter the first one (code block below)
+        if (hts_delta != 0) {
+            for (sci in (seq_len(abs(hts_delta)) * sign(hts_delta))) {
+                thiscodes <- dv_green_codes(paste0("*p", lead0(last_scores[1] + sci), ":", lead0(last_scores[2])), meta)
+                newscores_h <- c(newscores_h, rep(last_scores[1] + sci, length(thiscodes)))
+                newcodes <- c(newcodes, thiscodes)
+            }
+            newscores_v <- rep(last_scores[2], length(newscores_h))
+            last_scores[1] <- rx$home_team_score
+        }
+        if (vts_delta != 0) {
+            for (sci in (seq_len(abs(vts_delta)) * sign(vts_delta))) {
+                thiscodes <- dv_green_codes(paste0("ap", lead0(last_scores[1]), ":", lead0(last_scores[2] + sci)), meta)
+                newscores_v <- c(newscores_v, rep(last_scores[2] + sci, length(thiscodes)))
+                newcodes <- c(newcodes, thiscodes)
+                newscores_h <- c(newscores_h, rep(last_scores[1], length(thiscodes)))
+            }
+        }
+        if (length(newcodes) != (n_adj * 3)) stop("adjustment length wrong?")
+        ## if a point is being subtracted, it is still given a # green code ("point win") for that team, which seems a bit silly
+        temp_point_ids <- rx$point_id
+        if (n_adj > 1) temp_point_ids <- temp_point_ids + rep(seq_len(abs(hts_delta) + abs(vts_delta)), each = 3) / (n_adj + 1L)
+        rx <- rx[rep(1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point_id = temp_point_ids, point = substr(newcodes, 2, 2) == "p", code = newcodes, home_team_score = newscores_h, visiting_team_score = newscores_v)
+    } else if (is_point) {
+        ## add green codes
+        if (!all(rx$team %in% c("a", "*"))) {
+            stop("not all team values in rx are '*' or 'a'")
+        }
+        ss1 <- function(x) case_when(!is.na(x) & nzchar(x) ~ substr(x, 1, 1), TRUE ~ "~")
+        if (all(opt1 %in% names(rx))) {
+            ## reconstruct codes first, codes to dv_green_codes need to be real ones
+            temp_codes <- paste0(ss1(rx$team), lead0(rx$player_number, na = "00"), ss1(rx$skill), ss1(rx$skill_type_code), ss1(rx$evaluation_code))
+            temp_codes[which(rx$point)] <- rx$code[which(rx$point)] ## retain the original point code
+            codes2 <- dv_green_codes(temp_codes, meta)
+        } else {
+            codes2 <- dv_green_codes(rx$code, meta)
+        }
+        ## the last element of codes2 will be the point code pc, any other extras need to be injected
+        if (length(codes2) > nrow(rx)) {
+            newcodes <- codes2[seq(from = nrow(rx), to = length(codes2) - 1L, by = 1L)] ## add these codes
+            rx <- bind_rows(head(rx, -1), ## not the last row
+                            rx[rep(nrow(rx) - 1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point = FALSE, code = newcodes),
+                            tail(rx, 1))
+        }
+    }
+    ## insert setter position codes, when setter has changed position (and not on first point, those come in the >LUp codes - so for the first point, make sure that the last_home_setter_position and last_visiting_setter_position are passed as their starting values)
+    spcodes <- c()
+    if (!rx$home_setter_position[1] %eq% last_home_setter_position) {
+        spcodes <- paste0("*z", rx$home_setter_position[1])
+    }
+    if (!rx$visiting_setter_position[1] %eq% last_visiting_setter_position) {
+        spcodes <- c(spcodes, paste0("az", rx$visiting_setter_position[1]))
+    }
+    if (length(spcodes) > 0) {
+        ## if this was a sub, the sub code should appear before the spcodes
+        rx <- bind_rows(if (is_sub) rx, rx[rep(1, length(spcodes)), keepcols] %>% mutate(team = substr(spcodes, 1, 1), code = spcodes), if (!is_sub) rx)
+    }
+    rx
+}
+
 #' Add green codes to the scouted codes from a rally
 #'
 #' @param code character: a character vector of scouted codes for a rally. The codes must be non-compound but need only be the first 6 characters (i.e. up to and including the evaluation_code). The code vector must have a valid point code at the end (the `*p` or `ap` code)
