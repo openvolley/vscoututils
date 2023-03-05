@@ -198,7 +198,7 @@ dv_create_meta_players <- function(players) {
     players$special_role[tolower(players$role) %eq% "libero"] <- paste0(players$special_role[tolower(players$role) %eq% "libero"], "L")
     if (!"foreign" %in% names(players)) players$foreign <- FALSE
     for (nm in paste0("starting_position_set", 1:5)) if (!nm %in% names(players)) players[[nm]] <- NA_character_
-    temp <- tibble(X1 = 0,
+    temp <- tibble(X1 = 0L,
                    number = players$number,
                    X3 = seq_len(nrow(players)),
                    starting_position_set1 = players$starting_position_set1,
@@ -215,7 +215,7 @@ dv_create_meta_players <- function(players) {
                    foreign = players$foreign)
     temp$X16 <- temp$X17 <- temp$X18 <- temp$X19 <- temp$X20 <- temp$X21 <- temp$X22 <- temp$X23 <- NA
     temp$name <- paste(temp$firstname, temp$lastname)
-    temp
+    temp %>% dplyr::arrange(.data$number) %>% mutate(X3 = dplyr::row_number())
 }
 make_player_id <- function(lastname, firstname) toupper(paste0(substr(lastname, 1, 3), "-", substr(firstname, 1, 3)))
 
@@ -380,6 +380,7 @@ dv_create_meta <- function(match, more, comments, result, teams, players_h, play
     if (missing(players_v)) players_v <- dv_create_meta_players(tibble(lastname = character(), firstname = character(), number = integer()))
     assert_that(is.data.frame(players_h))
     assert_that(is.data.frame(players_v))
+    players_v$X1 <- 1L
     players_v$X3 <- players_v$X3 + nrow(players_h)
     pids <- c(players_h$player_id, players_v$player_id)
     if (any(duplicated(pids))) {
