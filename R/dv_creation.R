@@ -269,7 +269,7 @@ dv_create_meta_attack_combos <- function(code, start_zone, side = NA_character_,
         msgs <- c(msgs, paste0("ignoring duplicate attack combination codes: ", paste0(unique(ax$code[duplicated(ax$code)]), collapse = ", ")))
         ax <- ax[!duplicated(ax$code), , drop = FALSE]
     }
-    set_dvmsg(ax, tibble(line_number = NA, message = msgs, severity = 3))
+    if (length(msgs) > 0) set_dvmsg(ax, tibble(line_number = NA, message = msgs, severity = 3)) else ax
 }
 
 #' Create the `sets` (setter calls) metadata component of a datavolley object
@@ -307,7 +307,7 @@ dv_create_meta_setter_calls <- function(code, description, colour = NA_character
         msgs <- c(msgs, paste0("ignoring duplicate setter calls: ", paste0(unique(sx$code[duplicated(sx$code)]), collapse = ", ")))
         sx <- sx[!duplicated(sx$code), , drop = FALSE]
     }
-    set_dvmsg(sx, tibble(line_number = NA, message = msgs, severity = 3))
+    if (length(msgs) > 0) set_dvmsg(sx, tibble(line_number = NA, message = msgs, severity = 3)) else sx
 }
 
 #' Create the `video` metadata component of a datavolley object
@@ -405,6 +405,6 @@ dv_create_meta <- function(match, more, comments, result, teams, players_h, play
     assert_that(is.data.frame(video))
     meta <- c(meta, list(players_h = players_h, players_v = players_v, attacks = attacks, sets = setter_calls, winning_symbols = winning_symbols, video = video, filename = ""))
     meta$match_id <- dv_create_meta_match_id(meta)
-    set_dvmsg(meta, tibble(line_number = NA, message = msgs, severity = 2))
+    if (length(msgs) > 0) set_dvmsg(meta, tibble(line_number = NA, message = msgs, severity = 2)) else meta
 }
 
