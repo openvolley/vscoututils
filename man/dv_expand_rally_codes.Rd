@@ -19,9 +19,9 @@ dv_expand_rally_codes(
 \itemize{
 \item point_id, code, team ("*" or "a"), point, substitution, timeout, home_setter_position, visiting_setter_position
 \item home_team_score, visiting_team_score (scores at the end of the rally)
+\item player_out, player_in (substitions)
 and optional columns:
 \item player_number, skill, skill_type_code, evaluation_code (used to rebuild the codes before calling \code{\link[=dv_green_codes]{dv_green_codes()}}
-\item player_out (outgoing sub player - used to check if the setter has been substituted if provided)
 }}
 
 \item{last_home_setter_position, last_visiting_setter_position}{integer: home and visiting setter positions in the previous rally}
@@ -38,7 +38,7 @@ and optional columns:
 \description{
 \itemize{
 \item insert dummy rally rows for score corrections. Note that this will not adjust the setter position in the dummy rows nor insert intermediate setter positions (but will insert one setter position code per team at the start of the returned data frame, if needed)
-\item ensure that the substitution code is a setter substitution (*P or aP) if it was the on-court setter that was substituted
+\item for a substitution, insert the setter assignment code (*PXX or aPXX) if it was the on-court setter that was substituted
 \item insert the setter position codes at the start of the rally. These should not be inserted on the first point of a set, in that situation they should be in the >LUp codes - so for the first point, make sure that the \code{last_home_setter_position} and \code{last_visiting_setter_position} are passed as their starting values)
 }
 }

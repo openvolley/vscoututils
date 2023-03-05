@@ -3,15 +3,15 @@
 #' Expand scouted rally codes
 #'
 #' * insert dummy rally rows for score corrections. Note that this will not adjust the setter position in the dummy rows nor insert intermediate setter positions (but will insert one setter position code per team at the start of the returned data frame, if needed)
-#' * ensure that the substitution code is a setter substitution (*P or aP) if it was the on-court setter that was substituted
+#' * for a substitution, insert the setter assignment code (*PXX or aPXX) if it was the on-court setter that was substituted
 #' * insert the setter position codes at the start of the rally. These should not be inserted on the first point of a set, in that situation they should be in the >LUp codes - so for the first point, make sure that the `last_home_setter_position` and `last_visiting_setter_position` are passed as their starting values)
 #'
 #' @param rx data.frame: with at least the columns:
 #' * point_id, code, team ("*" or "a"), point, substitution, timeout, home_setter_position, visiting_setter_position
 #' * home_team_score, visiting_team_score (scores at the end of the rally)
+#' * player_out, player_in (substitions)
 #' and optional columns:
 #' * player_number, skill, skill_type_code, evaluation_code (used to rebuild the codes before calling [dv_green_codes()]
-#' * player_out (outgoing sub player - used to check if the setter has been substituted if provided)
 #' @param last_home_setter_position,last_visiting_setter_position integer: home and visiting setter positions in the previous rally
 #' @param last_home_team_score,last_visiting_team_score integer: home and visiting team scores at the end of the previous rally
 #' @param keepcols character: names of the columns in `rx` to keep, when inserting new rows. Values in these columns will be copied from an adjacent row. If `keepcols` is not provided, a guess will be made
@@ -50,7 +50,8 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
         is_point <- TRUE
     }
     ## if this was this a substitution, did the setter get substituted?
-    if (is_sub && "player_out" %in% names(rx)) {
+    if (is_sub) {
+        newcodes <- c()
         if (rx$team %eq% "*") {
             setter_num <- tryCatch(rx[[paste0("home_p", rx$home_setter_position)]], error = NA_integer_)
         } else if (rx$team %eq% "a") {
@@ -61,8 +62,16 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
         if (is.na(setter_num)) {
             warning("substitution but unknown setter number, so not checking if setter was substituted")
         } else {
-            if (rx$player_out == setter_num && grepl("^[a\\*]c", rx$code)) substr(rx$code, 2, 2) <- "P" ## make the sub code a setter sub
+            ## the lineup should already have changed on this line, so the player coming in should be in the on-court lineup in the setter position
+            ## but check the outgoing player as well
+            if (setter_num %in% c(rx$player_in, rx$player_out)) {
+                ## insert the setter assignment code and the setter location code always follows it
+                newcodes <- c(paste0(rx$team, "P", lead0(rx$player_in, na = "00")),
+                              paste0(rx$team, "z", if (rx$team %eq% "*") rx$home_setter_position else rx$visiting_setter_position))
+            }
         }
+        ## add the new codes
+        if (length(newcodes) > 0) rx <- bind_rows(rx, rx[rep(1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point = FALSE, code = newcodes))
     } else if (is_sc) {
         ## score correction, add pc rows if needed, there may need to be more than one
         ## also discard the existing point code, because it will need to be re-created in sequence here
@@ -117,17 +126,9 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
         }
     }
     ## insert setter position codes, when setter has changed position (and not on first point, those come in the >LUp codes - so for the first point, make sure that the last_home_setter_position and last_visiting_setter_position are passed as their starting values)
-    spcodes <- c()
-    if (!rx$home_setter_position[1] %eq% last_home_setter_position) {
-        spcodes <- paste0("*z", rx$home_setter_position[1])
-    }
-    if (!rx$visiting_setter_position[1] %eq% last_visiting_setter_position) {
-        spcodes <- c(spcodes, paste0("az", rx$visiting_setter_position[1]))
-    }
-    if (length(spcodes) > 0) {
-        ## if this was a sub, the sub code should appear before the spcodes
-        rx <- bind_rows(if (is_sub) rx, rx[rep(1, length(spcodes)), keepcols] %>% mutate(team = substr(spcodes, 1, 1), code = spcodes), if (!is_sub) rx)
-    }
+    spcodes <- if (!rx$home_setter_position[1] %eq% last_home_setter_position) paste0("*z", rx$home_setter_position[1]) else c()
+    if (!rx$visiting_setter_position[1] %eq% last_visiting_setter_position) spcodes <- c(spcodes, paste0("az", rx$visiting_setter_position[1]))
+    if (length(spcodes) > 0) rx <- bind_rows(rx[rep(1, length(spcodes)), keepcols] %>% mutate(team = substr(spcodes, 1, 1), point = FALSE, code = spcodes), rx)
     rx
 }
 
