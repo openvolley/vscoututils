@@ -5,16 +5,17 @@
 #' Default attack combination codes table
 #' @param data_type string: "indoor", "beach"
 #' @param style string: conventions "default", "volleymetrics", "german"
-#' @param simplified logical: if `TRUE`, just the most common ones
+#' @param simplified logical: if `TRUE`, just the most common ones (indoor only)
 #'
 #' @return A tibble
 #'
 #' @export
 dv_default_attack_combos <- function(data_type = "indoor", style = "default", simplified = TRUE) {
     ##data_type <- match.arg(data_type, c("indoor", "beach"))
-    data_type <- match.arg(data_type, c("indoor"))
+    data_type <- match.arg(data_type, c("indoor", "beach"))
     style <- match.arg(style, .dv_default_styles)
-    out <- dplyr::tribble(~code, ~attacker_position, ~side, ~type, ~description, ~X6, ~colour, ~start_coordinate, ~set_type,
+    out <- if (data_type == "indoor") {
+               dplyr::tribble(~code, ~attacker_position, ~side, ~type, ~description, ~X6, ~colour, ~start_coordinate, ~set_type,
                           "CB", 2, "L", "N", "Slide next to setter", NA, 16711680, 4976, "C",
                           "CD", 2, "L", "N", "Slide away from setter", NA, 16711680, 4970, "C",
                           "CF", 2, "L", "N", "Slide close to setter", NA,16711680, 4986, "C",
@@ -69,8 +70,47 @@ dv_default_attack_combos <- function(data_type = "indoor", style = "default", si
                           "Z6", 2, "L", "M", "Medium Red", NA, 0, 4988, "B",
                           "Z8", 9, "C", "M", "Medium Backrow A", NA, 0, 4186, "B"
                           )
+           } else {
+               dplyr::tribble(~code, ~attacker_position, ~side, ~type, ~description, ~X6, ~colour, ~start_coordinate, ~set_type,
+                              "X1", 4, "R", "M", "Standard far left", NA, "#FF0000", 4914 , "-",
+                              "X2", 4, "R", "M", "Standard left", NA, "#FF0000", 4929 , "-",
+                              "X3", 3, "C", "M", "Standard middle", NA, "#FF0000", 4752 , "-",
+                              "X4", 2, "L", "M", "Standard right", NA, "#FF0000", 4972 , "-",
+                              "X5", 2, "L", "M", "Satndard far right", NA, "#FF0000", 4887 , "-",
+                              "V1", 4, "R", "H", "Away far left", NA, "#00FF00", 4213 , "-",
+                              "V2", 4, "R", "H", "Away left", NA, "#00FF00", 4129 , "-",
+                              "V3", 3, "C", "H", "Away middle", NA, "#00FF00", 4051 , "-",
+                              "V4", 2, "L", "H", "Away right", NA, "#00FF00", 4068 , "-",
+                              "V5", 2, "L", "H", "Away far right", NA, "#00FF00", 4087 , "-",
+                              "Z1", 4, "C", "O", "2.Ball Far Left", NA, "#0000FF", 4815 , "-",
+                              "Z2", 4, "C", "O", "2.Ball Left", NA, "#0000FF", 4733 , "-",
+                              "Z3", 3, "C", "O", "2.Ball Middle", NA, "#0000FF", 4552 , "-",
+                              "Z4", 2, "C", "O", "2.Ball Right", NA, "#0000FF", 4368 , "-",
+                              "Z5", 2, "C", "O", "2.Ball Far Right", NA, "#0000FF", 4788 , "-",
+                              "XX", 3, "C", "O", "Attack on opponent freeball", NA, "#0000FF", 4949 , "-",
+                              "C1", 4, "C", "H", "Cross far left", NA, "#00FFFF", 4916 , "-",
+                              "C2", 4, "C", "H", "Cross left", NA, "#00FFFF", 4834 , "-",
+                              "C3", 3, "C", "H", "Cross middle", NA, "#00FFFF", 4951 , "-",
+                              "C4", 2, "C", "H", "Cross right", NA, "#00FFFF", 4865 , "-",
+                              "C5", 2, "C", "H", "Cross far right", NA, "#00FFFF", 4887 , "-",
+                              "P1", 4, "C", "T", "Quick far left", NA, "#FF00FF", 4811 , "-",
+                              "P2", 4, "C", "T", "Quick left", NA, "#FF00FF", 4834 , "-",
+                              "P3", 3, "C", "T", "Quick middle", NA, "#FF00FF", 4849 , "-",
+                              "P4", 2, "C", "T", "Quick right", NA, "#FF00FF", 4867 , "-",
+                              "P5", 2, "C", "T", "Quick far right", NA, "#FF00FF", 4785 , "-")##,
+                              ##"L1", 1, "C", "O", "Laser 1", NA, "#000080", 2075 , "-",
+                              ##"L6", 6, "C", "O", "Laser 6", NA, "#000080", 1847 , "-",
+                              ##"L5", 5, "C", "O", "Laser 5", NA, "#000080", 1821, "-",
+                              ##"L9", 9, "C", "O", "Laser 9", NA, "#000080", 3275, "-",
+                              ##"L8", 8, "C", "O", "Laser 8", NA, "#000080", 3249, "-",
+                              ##"L7", 7, "C", "O", "Laser 7", NA, "#000080", 3221, "-",
+                              ##"L2", 2, "C", "O", "Laser 2", NA, "#000080", 4575, "-",
+                              ##"L3", 3, "C", "O", "Laser 3", NA, "#000080", 4550, "-",
+                              ##"L4", 4, "C", "O", "Laser 4", NA, "#000080", 4522, "-")
+           }
+
     out$X10 <- out$X11 <- NA ## some other, unpopulated columns
-    if (isTRUE(simplified)) {
+    if (isTRUE(simplified) && data_type == "indoor") {
         dplyr::filter(out, .data$code %in% c("X1", "X2", "X7", "XD", "CF", "CD", "PP", "PR", "P2",
                                              "VP", "V0", "V3", "V4", "V5", "V6", "V8",
                                              "XP", "X0", "X5", "X6", "X8"))
