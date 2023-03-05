@@ -7,11 +7,11 @@
 dv_insert_technical_timeouts(x, at, data_type)
 }
 \arguments{
+\item{x}{datavolleyplays: the plays component of a datavolley object as returned by \code{dv_read()}}
+
 \item{at}{list: (optional) a two-element list can be supplied, giving the scores at which technical timeouts will be inserted for sets 1--4, and set 5 or golden sets. If not provided, technical timeouts are inserted at points 8 and 16 of sets 1--4 (for indoor files) or when the team scores sum to 21 in sets 1--2 (beach)}
 
 \item{data_type}{string: "indoor" or "beach". If not provided, a guess will be made as to whether \code{x} is beach or indoor data}
-
-\item{x:}{datavolleyplays: the plays component of a datavolley object as returned by \code{\link[=dv_read]{dv_read()}}}
 }
 \value{
 A modified copy of \code{x}

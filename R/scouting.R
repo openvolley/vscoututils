@@ -175,7 +175,7 @@ dv_green_codes <- function(code, meta) {
 
 #' Insert technical timeouts
 #'
-#' @param x: datavolleyplays: the plays component of a datavolley object as returned by [dv_read()]
+#' @param x datavolleyplays: the plays component of a datavolley object as returned by `dv_read()`
 #' @param at list: (optional) a two-element list can be supplied, giving the scores at which technical timeouts will be inserted for sets 1--4, and set 5 or golden sets. If not provided, technical timeouts are inserted at points 8 and 16 of sets 1--4 (for indoor files) or when the team scores sum to 21 in sets 1--2 (beach)
 #' @param data_type string: "indoor" or "beach". If not provided, a guess will be made as to whether `x` is beach or indoor data
 #' @return A modified copy of `x`
