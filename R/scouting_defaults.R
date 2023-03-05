@@ -88,7 +88,6 @@ dv_default_attack_combos <- function(data_type = "indoor", style = "default", si
 #' @export
 dv_default_setter_calls <- function(data_type = "indoor", style = "default") {
     data_type <- match.arg(data_type, c("indoor"))
-    ##data_type <- match.arg(data_type, c("indoor", "beach"))
     style <- match.arg(style, .dv_default_styles)
     dplyr::tribble(~code, ~X2, ~description, ~X4, ~colour, ~start_coordinate, ~mid_coordinate, ~end_coordinate, ~path, ~path_colour, ~X11,
                    "K1", NA, "Front Quick", NA, 16711680L, 3949L, 4454L, 4958L, NA_character_, NA_integer_, NA,
@@ -154,33 +153,60 @@ dv_default_scouting_table <- function(data_type = "indoor", style = "default") {
 #'
 #' @export
 dv_default_skill_subtypes <- function(data_type = "indoor", style = "default") {
-    data_type <- match.arg(data_type, c("indoor"))
+    data_type <- match.arg(data_type, c("indoor", "beach"))
     style <- match.arg(style, .dv_default_styles)
-    dplyr::tribble(~skill, ~skill_subtype_code, ~skill_subtype,
-                   "Attack", "H", "Hard spike",
-                   "Attack", "P", "Soft spike/topspin",
-                   "Attack", "T", "Tip",
-                   "Block", "A", "Block assist",
-                   "Block", "T", "Block attempt",
-                   "Block", "P", "Block on soft spike",
-                   "Reception", "L", "On left",
-                   "Reception", "R", "On right",
-                   "Reception", "W", "Low",
-                   "Reception", "O", "Overhand",
-                   "Reception", "M", "Middle line",
-                   "Set", "1", "1 hand set",
-                   "Set", "2", "2 hands set",
-                   "Set", "3", "Bump set",
-                   "Set", "4", "Other set",
-                   "Set", "5", "Underhand set",
-                   "Set", "O", "Hand set",
-                   "Set", "U", "Bump set",
-                   "Dig", "S", "On spike",
-                   "Dig", "C", "Spike cover",
-                   "Dig", "B", "After block",
-                   "Dig", "E", "Emergency",
-                   "Dig", "T", "Tip",
-                   "Dig", "P", "Soft spike")
+    if (data_type == "indoor") {
+        dplyr::tribble(~skill, ~skill_subtype_code, ~skill_subtype,
+                       "Attack", "H", "Hard spike",
+                       "Attack", "P", "Soft spike/topspin",
+                       "Attack", "T", "Tip",
+                       "Block", "A", "Block assist",
+                       "Block", "T", "Block attempt",
+                       "Reception", "L", "On left",
+                       "Reception", "R", "On right",
+                       "Reception", "W", "Low",
+                       "Reception", "O", "Overhand",
+                       "Reception", "M", "Middle line",
+                       "Set", "1", "1 hand set",
+                       "Set", "2", "2 hands set",
+                       "Set", "3", "Bump set",
+                       "Set", "4", "Other set",
+                       "Set", "5", "Underhand set",
+                       "Dig", "S", "On spike",
+                       "Dig", "C", "Spike cover",
+                       "Dig", "B", "After block",
+                       "Dig", "E", "Emergency",
+                       "Dig", "T", "Tip",
+                       "Dig", "P", "Soft spike",
+                       "Dig", "H", "Hard spike")
+    } else {
+        dplyr::tribble(~skill, ~skill_subtype_code, ~skill_subtype,
+                       "Attack", "H", "Power",
+                       "Attack", "P", "Shot",
+                       "Attack", "T", "Poke",
+                       "Block", "A", "Block assist",
+                       "Block", "T", "Block attempt",
+                       "Reception", "L", "On left",
+                       "Reception", "R", "On right",
+                       "Reception", "W", "Low",
+                       "Reception", "O", "Overhand",
+                       "Reception", "M", "Middle line",
+                       "Set", "1", "1 hand set",
+                       "Set", "2", "2 hands set",
+                       "Set", "3", "Bump set",
+                       "Set", "4", "Other set",
+                       "Set", "5", "Underhand set",
+                       ## O and U were custom codes used by some beach scouts prior to DV4
+                       "Set", "O", "Hand set",
+                       "Set", "U", "Bump set",
+                       "Dig", "S", "On spike",
+                       "Dig", "C", "Spike cover",
+                       "Dig", "B", "After block",
+                       "Dig", "E", "Emergency",
+                       "Dig", "T", "Poke",
+                       "Dig", "P", "Shot",
+                       "Dig", "H", "Power")
+    }
 }
 
 
@@ -319,7 +345,18 @@ dv_default_num_players <- function(data_type = "indoor", style = "default") {
     data_type <- match.arg(data_type, c("indoor", "beach"))
     style <- match.arg(style, .dv_default_styles)
     if (data_type == "beach") {
-        if (style == "default") {
+        if (style == "volleymetrics") {
+            ## TODO check
+            tribble(~skill, ~num_players_code, ~num_players,
+                    "Attack", 0L, "No block",
+                    "Attack", 1L, "Line block",
+                    "Attack", 2L, "Crosscourt block",
+                    "Attack", 3L, "Drop", ## no block, blocker defends instead
+                    "Block", 0L, "No block",
+                    "Block", 1L, "Line block",
+                    "Block", 2L, "Crosscourt block",
+                    "Block", 3L, "Drop") ## no block, blocker defends instead
+        } else {
             tribble(~skill, ~num_players_code, ~num_players,
                     "Attack", 0L, "No block",
                     "Attack", 1L, "Line block",
@@ -331,17 +368,6 @@ dv_default_num_players <- function(data_type = "indoor", style = "default") {
                     "Block", 2L, "Crosscourt block",
                     "Block", 3L, "Block jumps to line",
                     "Block", 4L, "Block jumps to crosscourt")
-        } else if (style == "volleymetrics") {
-            ## TODO check
-            tribble(~skill, ~num_players_code, ~num_players,
-                    "Attack", 0L, "No block",
-                    "Attack", 1L, "Line block",
-                    "Attack", 2L, "Crosscourt block",
-                    "Attack", 3L, "Drop", ## no block, blocker defends instead
-                    "Block", 0L, "No block",
-                    "Block", 1L, "Line block",
-                    "Block", 2L, "Crosscourt block",
-                    "Block", 3L, "Drop") ## no block, blocker defends instead
         }
     } else {
         ## indoor
