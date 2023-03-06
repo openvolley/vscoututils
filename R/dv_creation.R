@@ -223,7 +223,7 @@ make_player_id <- function(lastname, firstname) toupper(paste0(substr(lastname, 
 #'
 #' The `attacks` metadata component of a datavolley object describes the attack combination codes
 #'
-#' @param code character: vector of two-character (uppercase) attack codes. Attack codes must start with C, I, J, I, L, P, V, W, X, Y, or Z
+#' @param code character: vector of two-character (uppercase) attack codes. Attack codes must start with C, G, I, J, L, P, V, W, X, Y, or Z
 #' @param start_zone integer: vector of start zones
 #' @param side character: vector of L, C, R
 #' @param tempo character: vector of tempo codes F, H, M, N, O, Q, T, U
@@ -239,7 +239,8 @@ dv_create_meta_attack_combos <- function(code, start_zone, side = NA_character_,
     assert_that(is.character(code), !any(is.na(code)))
     msgs <- c()
     code <- toupper(code)
-    if (!all(substr(code, 1, 1) %in% c("C", "I", "J", "I", "L", "P", "V", "W", "X", "Y", "Z"))) stop("attack combination codes must start with C, I, J, I, L, P, V, W, X, Y, or Z")
+    allowed <- c("C", "G", "I", "J", "L", "P", "V", "W", "X", "Y", "Z")
+    if (!all(substr(code, 1, 1) %in% allowed)) stop("attack combination codes must start with ", paste(allowed, collapse = ", "))
     if (!all(nchar(code) == 2)) stop("attack combination codes must be two letters")
     start_zone <- as.integer(start_zone)
     assert_that(!any(is.na(start_zone)), all(start_zone %in% 1:9))

@@ -1,6 +1,6 @@
 Package: vscoututils
 Title: Utility Functions for Volleyball Scout Files
-Version: 0.0.6
+Version: 0.0.7
 Authors@R: c(person("Ben", "Raymond", email = "ben@untan.gl", role = c("aut", "cre")),
              person("Adrien", "Ickowicz", role = "aut"))
 Description: Common utility functions shared across various volleyball scouting and data access packages. Functions in this package are likely to be mostly of interest to package developers, rather than end users.
