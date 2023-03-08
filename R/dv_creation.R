@@ -152,15 +152,25 @@ dv_create_meta_result <- function(home_team_scores = NA_integer_, visiting_team_
 #' @export
 dv_create_meta_teams <- function(team_ids, teams, sets_won, coaches, assistants, shirt_colours) {
     assert_that(is.character(team_ids), length(team_ids) == 2, !any(is.na(team_ids)))
+    msgs <- c()
+    if (team_ids[1] == team_ids[2]) {
+        msgs <- "The two team IDs are identical. They will be modified here but this may still cause problems"
+        team_ids <- paste(team_ids, c(" (home)", " (visiting)"))
+    }
     assert_that(is.character(teams), length(teams) == 2, !any(is.na(teams)))
+    if (teams[1] == teams[2]) {
+        msgs <- c(msgs, "The two team names are identical. They will be modified here but this may still cause problems")
+        teams <- paste(teams, c(" (home)", " (visiting)"))
+    }
     if (missing(sets_won) || length(sets_won) != 2) sets_won <- NA_integer_
     if (missing(coaches) || length(coaches) != 2) coaches <- NA_integer_
     if (missing(assistants) || length(assistants) != 2) assistants <- NA_integer_
     if (missing(shirt_colours) || length(shirt_colours) != 2) shirt_colours <- NA_integer_
-    tibble(team_id = team_ids, team = teams, sets_won = sets_won, coach = coaches, assistant = assistants, shirt_colour = shirt_colours,
-           X7 = NA, X8 = NA, X9 = NA, X10 = NA,
-           home_away_team = c("*", "a"),
-           won_match = if (any(is.na(sets_won)) || length(sets_won) != 2 || sets_won[1] == sets_won[2]) NA else if (sets_won[1] > sets_won[2]) c(TRUE, FALSE) else c(FALSE, TRUE))
+    out <- tibble(team_id = team_ids, team = teams, sets_won = sets_won, coach = coaches, assistant = assistants, shirt_colour = shirt_colours,
+                  X7 = NA, X8 = NA, X9 = NA, X10 = NA,
+                  home_away_team = c("*", "a"),
+                  won_match = if (any(is.na(sets_won)) || length(sets_won) != 2 || sets_won[1] == sets_won[2]) NA else if (sets_won[1] > sets_won[2]) c(TRUE, FALSE) else c(FALSE, TRUE))
+    if (length(msgs) > 0) set_dvmsg(out, tibble(line_number = NA, message = msgs, severity = 1)) else out
 }
 
 #'@rdname dv_create_meta_teams
