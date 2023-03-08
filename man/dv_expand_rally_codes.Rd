@@ -11,7 +11,8 @@ dv_expand_rally_codes(
   last_home_team_score,
   last_visiting_team_score,
   keepcols,
-  meta
+  meta,
+  rebuild_codes = TRUE
 )
 }
 \arguments{
@@ -21,7 +22,7 @@ dv_expand_rally_codes(
 \item home_team_score, visiting_team_score (scores at the end of the rally)
 \item player_out, player_in (substitions)
 and optional columns:
-\item player_number, skill, skill_type_code, evaluation_code (used to rebuild the codes before calling \code{\link[=dv_green_codes]{dv_green_codes()}}
+\item player_number, skill (one-character code), skill_type_code, evaluation_code (used to rebuild the codes before calling \code{\link[=dv_green_codes]{dv_green_codes()}}
 }}
 
 \item{last_home_setter_position, last_visiting_setter_position}{integer: home and visiting setter positions in the previous rally}
@@ -31,6 +32,8 @@ and optional columns:
 \item{keepcols}{character: names of the columns in \code{rx} to keep, when inserting new rows. Values in these columns will be copied from an adjacent row. If \code{keepcols} is not provided, a guess will be made}
 
 \item{meta}{list: meta component from a datavolley object}
+
+\item{rebuild_codes}{logical: if \code{TRUE}, reconstruct the scout code before calling \code{\link[=dv_green_codes]{dv_green_codes()}}}
 }
 \value{
 \code{rx} potentially with additional rows inserted. Note that the added rows might have fractional \code{point_id} values, in which case you will need to renumber all \code{point_id}s in the match to integers afterwards
