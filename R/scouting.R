@@ -33,8 +33,8 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
         }
     }
     if (missing(keepcols)) keepcols <- c("point_id", "time", "video_time", "home_team_score", "visiting_team_score", "point_won_by", "set_number",
-                                         "home_setter_position", "visiting_setter_position", "home_p1", "home_p2", "home_p3", "home_p4", "home_p5", "home_p6",
-                                         "visiting_p1", "visiting_p2", "visiting_p3", "visiting_p4", "visiting_p5", "visiting_p6")
+                                         "home_setter_position", "visiting_setter_position", paste0("home_p", 1:6), paste0("visiting_p", 1:6),
+                                         paste0("home_player_id", 1:6), paste0("visiting_player_id", 1:6))
     assert_that(is.character(keepcols))
     keepcols <- intersect(names(rx), keepcols)
     is_sub <- is_to <- is_sc <- is_point <- FALSE

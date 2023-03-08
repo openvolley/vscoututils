@@ -34,7 +34,7 @@ dv_update_meta <- function(x) {
             ##message("updating scores for set ", si)
             set_plays <- x$plays[seq(set_start_rows[si], set_end_rows[si]), ]
             ## scores
-            scores <- c(max(set_plays$home_score_start_of_point, na.rm = TRUE), max(set_plays$visiting_score_start_of_point, na.rm = TRUE))
+            scores <- c(max(set_plays$home_team_score, na.rm = TRUE), max(set_plays$visiting_team_score, na.rm = TRUE))
             x$meta$result$score[si] <- paste0(scores[1], "-", scores[2])
             x$meta$result$score_home_team[si] <- scores[1]
             x$meta$result$score_visiting_team[si] <- scores[2]
