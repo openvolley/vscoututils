@@ -82,11 +82,11 @@ dv_default_attack_combos <- function(data_type = "indoor", style = "default", si
                               "V3", 3, "C", "H", "Away middle", NA, "#00FF00", 4051 , "-",
                               "V4", 2, "L", "H", "Away right", NA, "#00FF00", 4068 , "-",
                               "V5", 2, "L", "H", "Away far right", NA, "#00FF00", 4087 , "-",
-                              "Z1", 4, "C", "O", "2.Ball Far Left", NA, "#0000FF", 4815 , "-",
-                              "Z2", 4, "C", "O", "2.Ball Left", NA, "#0000FF", 4733 , "-",
-                              "Z3", 3, "C", "O", "2.Ball Middle", NA, "#0000FF", 4552 , "-",
-                              "Z4", 2, "C", "O", "2.Ball Right", NA, "#0000FF", 4368 , "-",
-                              "Z5", 2, "C", "O", "2.Ball Far Right", NA, "#0000FF", 4788 , "-",
+                              "@on2@1", 4, "C", "O", "2.Ball Far Left", NA, "#0000FF", 4815 , "-",
+                              "@on2@2", 4, "C", "O", "2.Ball Left", NA, "#0000FF", 4733 , "-",
+                              "@on2@3", 3, "C", "O", "2.Ball Middle", NA, "#0000FF", 4552 , "-",
+                              "@on2@4", 2, "C", "O", "2.Ball Right", NA, "#0000FF", 4368 , "-",
+                              "@on2@5", 2, "C", "O", "2.Ball Far Right", NA, "#0000FF", 4788 , "-",
                               "XX", 3, "C", "O", "Attack on opponent freeball", NA, "#0000FF", 4949 , "-",
                               "C1", 4, "C", "H", "Cross far left", NA, "#00FFFF", 4916 , "-",
                               "C2", 4, "C", "H", "Cross left", NA, "#00FFFF", 4834 , "-",
@@ -97,7 +97,7 @@ dv_default_attack_combos <- function(data_type = "indoor", style = "default", si
                               "P2", 4, "C", "T", "Quick left", NA, "#FF00FF", 4834 , "-",
                               "P3", 3, "C", "T", "Quick middle", NA, "#FF00FF", 4849 , "-",
                               "P4", 2, "C", "T", "Quick right", NA, "#FF00FF", 4867 , "-",
-                              "P5", 2, "C", "T", "Quick far right", NA, "#FF00FF", 4785 , "-")##,
+                              "P5", 2, "C", "T", "Quick far right", NA, "#FF00FF", 4785 , "-") %>% ##,
                               ##"L1", 1, "C", "O", "Laser 1", NA, "#000080", 2075 , "-",
                               ##"L6", 6, "C", "O", "Laser 6", NA, "#000080", 1847 , "-",
                               ##"L5", 5, "C", "O", "Laser 5", NA, "#000080", 1821, "-",
@@ -107,6 +107,7 @@ dv_default_attack_combos <- function(data_type = "indoor", style = "default", si
                               ##"L2", 2, "C", "O", "Laser 2", NA, "#000080", 4575, "-",
                               ##"L3", 3, "C", "O", "Laser 3", NA, "#000080", 4550, "-",
                               ##"L4", 4, "C", "O", "Laser 4", NA, "#000080", 4522, "-")
+                   dplyr::mutate(code = sub("@on2@", if (style == "usa") "L" else "Z", .data$code))
            }
 
     out$X10 <- out$X11 <- NA ## some other, unpopulated columns
@@ -149,19 +150,25 @@ dv_default_setter_calls <- function(data_type = "indoor", style = "default") {
 dv_default_winning_symbols <- function(data_type = "indoor", style = "default") {
     data_type <- match.arg(data_type, c("indoor", "beach"))
     style <- match.arg(style, .dv_default_styles)
-    tribble(~skill, ~win_lose, ~code,
-            "S", "L", "=",
-            "S", "W", "#",
-            "R", "L", "=",
-            "A", "L", "=",
-            "A", "L", "/",
-            "A", "W", "#",
-            "B", "L", "=",
-            "B", "L", "/",
-            "B", "W", "#",
-            "D", "L", "=",
-            "E", "L", "=",
-            "F", "L", "=")
+    out <- tribble(~skill, ~win_lose, ~code,
+                   "S", "L", "=",
+                   "S", "W", "#",
+                   "R", "L", "=",
+                   "A", "L", "=",
+                   "A", "L", "/",
+                   "A", "W", "#",
+                   "B", "L", "=",
+                   "B", "L", "/",
+                   "B", "W", "#",
+                   "D", "L", "=",
+                   "E", "L", "=",
+                   "F", "L", "=")
+    if (style == "volleymetrics") {
+        out %>% dplyr::filter(!(.data$skill == "B" & .data$code == "/")) %>% ## poor block, not a loss
+            bind_rows(tibble(skill = "E", win_lose = "L", code = "/")) ## E/ is a reach
+    } else {
+        out
+    }
 }
 
 #' Default scouting (type and evaluation for each skill) table
@@ -261,12 +268,22 @@ dv_default_skill_types <- function(data_type = "indoor", style = "default") {
     data_type <- match.arg(data_type, c("indoor", "beach"))
     style <- match.arg(style, .dv_default_styles)
     rs <- if (style == "volleymetrics") {
-              ## same for beach and indoor
-              tribble(~skill, ~skill_type_code, ~skill_type,
-                      "Serve", "Q", "Jump serve",
-                      "Serve", "M", "Jump-float serve",
-                      "Serve", "H", "Float serve", ## "float far" from the service line
-                      "Serve", "T", "Float serve") ## "float near" from the service line
+              if (data_type == "beach") {
+                  tribble(~skill, ~skill_type_code, ~skill_type,
+                          "Serve", "Q", "Jump serve",
+                          "Serve", "M", "Jump-float serve",
+                          "Serve", "N", "Hybrid serve",
+                          "Serve", "T", "Float serve", ## "float near" from the service line
+                          "Serve", "H", "Float serve", ## "float far" from the service line
+                          "Serve", "O", "Underhand serve")
+              } else {
+                  ## indoor
+                  tribble(~skill, ~skill_type_code, ~skill_type,
+                          "Serve", "Q", "Jump serve",
+                          "Serve", "M", "Jump-float serve",
+                          "Serve", "H", "Float serve", ## "float far" from the service line
+                          "Serve", "T", "Float serve") ## "float near" from the service line
+              }
           } else if (grepl("beach", data_type)) {
               tribble(~skill, ~skill_type_code, ~skill_type,
                       "Serve", "Q", "Jump serve",
@@ -275,7 +292,7 @@ dv_default_skill_types <- function(data_type = "indoor", style = "default") {
                       "Serve", "H", "Standing serve")
           } else {
               ## standard indoor
-              ## also see N = hybrid
+              ## also perhaps N = hybrid
               tribble(~skill, ~skill_type_code, ~skill_type,
                       "Serve", "Q", "Jump serve",
                       "Serve", "M", "Jump-float serve",
