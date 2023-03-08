@@ -363,9 +363,11 @@ dv_create_meta_match_id <- function(mx) {
 #' @param players_h tibble: home team table as returned by [dv_create_meta_players()]
 #' @param players_v tibble: visiting team table as returned by [dv_create_meta_players()]
 #' @param video tibble: as returned by [dv_create_meta_video()]
-#' @param attacks tibble: as returned by [dv_create_meta_attack_combos()]
-#' @param setter_calls tibble: as returned by [dv_create_meta_setter_calls()]
-#' @param winning_symbols tibble: as returned by [dv_default_winning_symbols()]
+#' @param attacks tibble: as returned by [dv_create_meta_attack_combos()]. If missing, the default attack combos for `data_type` and `style` and `simplified = TRUE` will be used
+#' @param setter_calls tibble: as returned by [dv_create_meta_setter_calls()]. If missing, the default setter calls for `data_type` and `style` will be used
+#' @param winning_symbols tibble: as returned by [dv_default_winning_symbols()]. If missing, the default winning symbols for `data_type` and `style` will be used
+#' @param data_type string: "indoor", "beach"
+#' @param style string: conventions "default", "volleymetrics", "german"
 #'
 #' @return A list
 #'
@@ -376,13 +378,13 @@ dv_create_meta_match_id <- function(mx) {
 #'                     team_ids = c("ardv", "badg"), teams = c("Aardvarks", "Badgers")))
 #'
 #' @export
-dv_create_meta <- function(match, more, comments, result, teams, players_h, players_v, video, attacks = dv_default_attack_combos(simplified = TRUE), setter_calls = dv_default_setter_calls(), winning_symbols = dv_default_winning_symbols()) {
+dv_create_meta <- function(match, more, comments, result, teams, players_h, players_v, video, attacks, setter_calls, winning_symbols, data_type = "indoor", style = "default") {
     assert_that(is.data.frame(match), nrow(match) == 1)
     if (!match$regulation %in% c("indoor sideout", "indoor rally point", "beach rally point")) stop("regulation: '", match$regulation, "' is unrecognized")
     assert_that(is.data.frame(more), nrow(more) == 1)
     assert_that(is.data.frame(comments), nrow(comments) == 1)
     if (missing(result)) result <- dv_create_meta_result()
-    assert_that(is.data.frame(result), nrow(result) == 1)
+    assert_that(is.data.frame(result))
     assert_that(is.data.frame(teams), nrow(teams) == 2)
     msgs <- c()
     meta <- list(match = match, more = more, comments = comments, result = result, teams = teams)
@@ -410,8 +412,11 @@ dv_create_meta <- function(match, more, comments, result, teams, players_h, play
     min_n_players <- if (grepl("beach", match$regulation)) 2L else 6L
     if (nrow(players_h) < min_n_players) warning("less than ", min_n_players, " players in home player list")
     if (nrow(players_v) < min_n_players) warning("less than ", min_n_players, " players in visiting player list")
+    if (missing(attacks) || is.null(attacks)) attacks <- dv_default_attack_combos(data_type = data_type, style = style, simplified = TRUE)
     assert_that(is.data.frame(attacks))
+    if (missing(setter_calls) || is.null(setter_calls)) setter_calls <- dv_default_setter_calls(data_type = data_type, style = style)
     assert_that(is.data.frame(setter_calls))
+    if (missing(winning_symbols) || is.null(winning_symbols)) winning_symbols <- dv_default_winning_symbols(data_type = data_type, style = style)
     assert_that(is.data.frame(winning_symbols))
     if (missing(video)) video <- dv_create_meta_video()
     assert_that(is.data.frame(video))

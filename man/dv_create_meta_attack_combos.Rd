@@ -16,7 +16,7 @@ dv_create_meta_attack_combos(
 )
 }
 \arguments{
-\item{code}{character: vector of two-character (uppercase) attack codes. Attack codes must start with C, I, J, I, L, P, V, W, X, Y, or Z}
+\item{code}{character: vector of two-character (uppercase) attack codes. Attack codes must start with C, G, I, J, L, P, V, W, X, Y, or Z}
 
 \item{start_zone}{integer: vector of start zones}
 

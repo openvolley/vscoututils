@@ -13,9 +13,11 @@ dv_create_meta(
   players_h,
   players_v,
   video,
-  attacks = dv_default_attack_combos(simplified = TRUE),
-  setter_calls = dv_default_setter_calls(),
-  winning_symbols = dv_default_winning_symbols()
+  attacks,
+  setter_calls,
+  winning_symbols,
+  data_type = "indoor",
+  style = "default"
 )
 }
 \arguments{
@@ -35,11 +37,15 @@ dv_create_meta(
 
 \item{video}{tibble: as returned by \code{\link[=dv_create_meta_video]{dv_create_meta_video()}}}
 
-\item{attacks}{tibble: as returned by \code{\link[=dv_create_meta_attack_combos]{dv_create_meta_attack_combos()}}}
+\item{attacks}{tibble: as returned by \code{\link[=dv_create_meta_attack_combos]{dv_create_meta_attack_combos()}}. If missing, the default attack combos for \code{data_type} and \code{style} and \code{simplified = TRUE} will be used}
 
-\item{setter_calls}{tibble: as returned by \code{\link[=dv_create_meta_setter_calls]{dv_create_meta_setter_calls()}}}
+\item{setter_calls}{tibble: as returned by \code{\link[=dv_create_meta_setter_calls]{dv_create_meta_setter_calls()}}. If missing, the default setter calls for \code{data_type} and \code{style} will be used}
 
-\item{winning_symbols}{tibble: as returned by \code{\link[=dv_default_winning_symbols]{dv_default_winning_symbols()}}}
+\item{winning_symbols}{tibble: as returned by \code{\link[=dv_default_winning_symbols]{dv_default_winning_symbols()}}. If missing, the default winning symbols for \code{data_type} and \code{style} will be used}
+
+\item{data_type}{string: "indoor", "beach"}
+
+\item{style}{string: conventions "default", "volleymetrics", "german"}
 }
 \value{
 A list
