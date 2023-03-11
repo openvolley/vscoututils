@@ -71,43 +71,41 @@ dv_default_attack_combos <- function(data_type = "indoor", style = "default", si
                           "Z8", 9, "C", "M", "Medium Backrow A", NA, 0, 4186, "B"
                           )
            } else {
+               ## sx <- list(FL = 0.6, L = 1.2, M = 2, R = 2.8, FR = 3.4) ## x-coords for far left, left, middle, right, far right
+               ## sy <- list(X = 3.4, V = 2.8, On2 = 3.35) ## y coords for standard, away (off the net), on2
                dplyr::tribble(~code, ~attacker_position, ~side, ~type, ~description, ~X6, ~colour, ~start_coordinate, ~set_type,
-                              "X1", 4, "R", "M", "Standard far left", NA, "#FF0000", 4914 , "-",
-                              "X2", 4, "R", "M", "Standard left", NA, "#FF0000", 4929 , "-",
-                              "X3", 3, "C", "M", "Standard middle", NA, "#FF0000", 4752 , "-",
-                              "X4", 2, "L", "M", "Standard right", NA, "#FF0000", 4972 , "-",
-                              "X5", 2, "L", "M", "Satndard far right", NA, "#FF0000", 4887 , "-",
-                              "V1", 4, "R", "H", "Away far left", NA, "#00FF00", 4213 , "-",
-                              "V2", 4, "R", "H", "Away left", NA, "#00FF00", 4129 , "-",
-                              "V3", 3, "C", "H", "Away middle", NA, "#00FF00", 4051 , "-",
-                              "V4", 2, "L", "H", "Away right", NA, "#00FF00", 4068 , "-",
-                              "V5", 2, "L", "H", "Away far right", NA, "#00FF00", 4087 , "-",
-                              "@on2@1", 4, "C", "O", "2.Ball Far Left", NA, "#0000FF", 4815 , "-",
-                              "@on2@2", 4, "C", "O", "2.Ball Left", NA, "#0000FF", 4733 , "-",
-                              "@on2@3", 3, "C", "O", "2.Ball Middle", NA, "#0000FF", 4552 , "-",
-                              "@on2@4", 2, "C", "O", "2.Ball Right", NA, "#0000FF", 4368 , "-",
-                              "@on2@5", 2, "C", "O", "2.Ball Far Right", NA, "#0000FF", 4788 , "-",
-                              "XX", 3, "C", "O", "Attack on opponent freeball", NA, "#0000FF", 4949 , "-",
-                              "C1", 4, "C", "H", "Cross far left", NA, "#00FFFF", 4916 , "-",
-                              "C2", 4, "C", "H", "Cross left", NA, "#00FFFF", 4834 , "-",
-                              "C3", 3, "C", "H", "Cross middle", NA, "#00FFFF", 4951 , "-",
-                              "C4", 2, "C", "H", "Cross right", NA, "#00FFFF", 4865 , "-",
-                              "C5", 2, "C", "H", "Cross far right", NA, "#00FFFF", 4887 , "-",
-                              "P1", 4, "C", "T", "Quick far left", NA, "#FF00FF", 4811 , "-",
-                              "P2", 4, "C", "T", "Quick left", NA, "#FF00FF", 4834 , "-",
-                              "P3", 3, "C", "T", "Quick middle", NA, "#FF00FF", 4849 , "-",
-                              "P4", 2, "C", "T", "Quick right", NA, "#FF00FF", 4867 , "-",
-                              "P5", 2, "C", "T", "Quick far right", NA, "#FF00FF", 4785 , "-") %>% ##,
-                              ##"L1", 1, "C", "O", "Laser 1", NA, "#000080", 2075 , "-",
-                              ##"L6", 6, "C", "O", "Laser 6", NA, "#000080", 1847 , "-",
-                              ##"L5", 5, "C", "O", "Laser 5", NA, "#000080", 1821, "-",
-                              ##"L9", 9, "C", "O", "Laser 9", NA, "#000080", 3275, "-",
-                              ##"L8", 8, "C", "O", "Laser 8", NA, "#000080", 3249, "-",
-                              ##"L7", 7, "C", "O", "Laser 7", NA, "#000080", 3221, "-",
-                              ##"L2", 2, "C", "O", "Laser 2", NA, "#000080", 4575, "-",
-                              ##"L3", 3, "C", "O", "Laser 3", NA, "#000080", 4550, "-",
-                              ##"L4", 4, "C", "O", "Laser 4", NA, "#000080", 4522, "-")
-                   dplyr::mutate(code = sub("@on2@", if (style == "usa") "L" else "Z", .data$code))
+                              "X1", 4, "R", "M", "Standard far left", NA, "#FF0000", 4913, "-", ## dv_xy2index(sx$FL, sy$X)
+                              "X2", 4, "R", "M", "Standard left", NA, "#FF0000", 4929, "-", ## dv_xy2index(sx$L, sy$X)
+                              "X3", 3, "C", "M", "Standard middle", NA, "#FF0000", 4951, "-", ## dv_xy2index(sx$M, sy$X)
+                              "X4", 2, "L", "M", "Standard right", NA, "#FF0000", 4972, "-", ## dv_xy2index(sx$R, sy$X)
+                              "X5", 2, "L", "M", "Satndard far right", NA, "#FF0000", 4988, "-", ## dv_xy2index(sx$FR, sy$X)
+                              "V1", 4, "R", "H", "Away far left", NA, "#00FF00", 4113, "-", ## dv_xy2index(sx$FL, sy$V)
+                              "V2", 4, "R", "H", "Away left", NA, "#00FF00", 4129, "-", ## dv_xy2index(sx$L, sy$V)
+                              "V3", 3, "C", "H", "Away middle", NA, "#00FF00", 4151, "-", ## dv_xy2index(sx$M, sy$V)
+                              "V4", 2, "L", "H", "Away right", NA, "#00FF00", 4172, "-", ## dv_xy2index(sx$R, sy$V)
+                              "V5", 2, "L", "H", "Away far right", NA, "#00FF00", 4188, "-", ## dv_xy2index(sx$FR, sy$V)
+                              "@on2@1", 4, "C", "O", "On 2 far left", NA, "#0000FF", 4813, "-", ## dv_xy2index(sx$FL, sy$On2)
+                              "@on2@2", 4, "C", "O", "On 2 left", NA, "#0000FF", 4829, "-", ## dv_xy2index(sx$L, sy$On2)
+                              "@on2@3", 3, "C", "O", "On 2 middle", NA, "#0000FF", 4851, "-", ## dv_xy2index(sx$M, sy$On2)
+                              "@on2@4", 2, "C", "O", "On 2 right", NA, "#0000FF", 4872, "-", ## dv_xy2index(sx$R, sy$On2)
+                              "@on2@5", 2, "C", "O", "On 2 far right", NA, "#0000FF", 4888, "-", ## dv_xy2index(sx$FR, sy$On2)
+                              "XX", 3, "C", "O", "Attack on opponent freeball", NA, "#0000FF", 4949, "-",
+                              ##"C1", 4, "C", "H", "Cross far left", NA, "#00FFFF", 4916 , "-",
+                              ##"C2", 4, "C", "H", "Cross left", NA, "#00FFFF", 4834 , "-",
+                              ##"C3", 3, "C", "H", "Cross middle", NA, "#00FFFF", 4951 , "-",
+                              ##"C4", 2, "C", "H", "Cross right", NA, "#00FFFF", 4865 , "-",
+                              ##"C5", 2, "C", "H", "Cross far right", NA, "#00FFFF", 4887 , "-",
+                              "L1", 4, "C", "O", "After block far left", NA, "#000000", 4813, "-", ## dv_xy2index(sx$FL, sy$On2)
+                              "L2", 4, "C", "O", "After block left", NA, "#000000", 4829, "-", ## dv_xy2index(sx$L, sy$On2)
+                              "L3", 3, "C", "O", "After block middle", NA, "#000000", 4851, "-", ## dv_xy2index(sx$M, sy$On2)
+                              "L4", 2, "C", "O", "After block right", NA, "#000000", 4872, "-", ## dv_xy2index(sx$R, sy$On2)
+                              "L5", 2, "C", "O", "After block far right", NA, "#000000", 4888, "-", ## dv_xy2index(sx$FR, sy$On2)
+                              "P1", 4, "C", "Q", "Quick far left", NA, "#FF00FF", 4913, "-", ## dv_xy2index(sx$FL, sy$X)
+                              "P2", 4, "C", "Q", "Quick left", NA, "#FF00FF", 4929, "-", ## dv_xy2index(sx$L, sy$X)
+                              "P3", 3, "C", "Q", "Quick middle", NA, "#FF00FF", 4951, "-", ## dv_xy2index(sx$M, sy$X)
+                              "P4", 2, "C", "Q", "Quick right", NA, "#FF00FF", 4972, "-", ## dv_xy2index(sx$R, sy$X)
+                              "P5", 2, "C", "Q", "Quick far right", NA, "#FF00FF", 4988, "-") %>% ## dv_xy2index(sx$FR, sy$X)
+                   dplyr::mutate(code = sub("@on2@", if (style == "usa") "C" else "Z", .data$code))
            }
 
     out$X10 <- out$X11 <- NA ## some other, unpopulated columns
