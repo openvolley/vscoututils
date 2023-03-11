@@ -195,8 +195,9 @@ dv_insert_technical_timeouts <- function(x, at, data_type) {
     } else {
         at <- list(NULL, NULL)
     }
-    pseq <- if (grepl("beach", data_type)) 1:2 else 1:6
     set_sets <- if (grepl("beach", data_type)) list(1:2, 3) else list(1:4, 5)
+    keepcols <- intersect(names(x), c("match_id", "time", "video_time", "set_number", "home_team_score", "visiting_team_score", "home_setter_position", "visiting_setter_position", paste0("home_p", 1:6), paste0("visiting_p", 1:6), paste0("home_player_id", 1:6), paste0("visiting_player_id", 1:6), "home_score_start_of_point", "visiting_score_start_of_point"))
+
     for (si in 1:2) {
         if (!is.null(at[[si]])) {
             if (is.numeric(at[[si]])) {
@@ -207,7 +208,7 @@ dv_insert_technical_timeouts <- function(x, at, data_type) {
                         if (length(idx) > 0) {
                             idx <- idx[1]
                             x <- bind_rows(x[seq_len(idx - 1L), ],
-                                           x[idx, c("set_number", "home_team_score", "visiting_team_score", "home_setter_position", "visiting_setter_position", paste0("home_p", pseq), paste0("visiting_p", pseq), "home_score_start_of_point", "visiting_score_start_of_point")] %>% mutate(skill = "Technical timeout", point_id = x$point_id[idx] - 0.5, timeout = TRUE, point = FALSE, end_of_set = FALSE, substitution = FALSE),
+                                           x[idx, keepcols] %>% mutate(skill = "Technical timeout", point_id = x$point_id[idx] - 0.5, timeout = TRUE, point = FALSE, end_of_set = FALSE, substitution = FALSE),
                                            x[setdiff(seq_len(nrow(x)), seq_len(idx - 1L)), ])
                         }
                     }
@@ -219,7 +220,7 @@ dv_insert_technical_timeouts <- function(x, at, data_type) {
                     if (length(idx) > 0) {
                         idx <- idx[1]
                         x <- bind_rows(x[seq_len(idx - 1L), ],
-                                       x[idx, c("set_number", "home_team_score", "visiting_team_score", "home_setter_position", "visiting_setter_position", "home_p1", "home_p2", "home_p3", "home_p", "home_p5", "home_p6", "visiting_p1", "visiting_p2", "visiting_p3", "visiting_p4", "visiting_p5", "visiting_p6", "home_score_start_of_point", "visiting_score_start_of_point")] %>% mutate(skill = "Technical timeout", point_id = x$point_id[idx] - 0.5, timeout = TRUE, point = FALSE, end_of_set = FALSE, substitution = FALSE),
+                                       x[idx, keepcols] %>% mutate(skill = "Technical timeout", point_id = x$point_id[idx] - 0.5, timeout = TRUE, point = FALSE, end_of_set = FALSE, substitution = FALSE),
                                        x[setdiff(seq_len(nrow(x)), seq_len(idx - 1L)), ])
                     }
                 }
