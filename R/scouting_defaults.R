@@ -278,7 +278,7 @@ dv_default_skill_types <- function(data_type = "indoor", style = "default") {
                           "Serve", "N", "Hybrid serve",
                           "Serve", "T", "Float serve", ## "float near" from the service line
                           "Serve", "H", "Float serve", ## "float far" from the service line
-                          "Serve", "O", "Underhand serve")
+                          "Serve", "U", "Underarm serve")
               } else {
                   ## indoor
                   tribble(~skill, ~skill_type_code, ~skill_type,
