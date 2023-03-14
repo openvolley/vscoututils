@@ -376,18 +376,18 @@ dv_default_skill_evaluations <- function(data_type = "indoor", style = "default"
                    "Freeball", "#", "Perfect")
     if (style == "volleymetrics") {
         out <- mutate(out, evaluation = case_when(
-                               .data$skill == "B" & .data$evaluation_code == "/" ~ "Poor, opposition to replay",
-                               .data$skill == "B" & .data$evaluation_code == "!" ~ "Poor, blocking team cannot recover", ## negative block, unplayable to our side
-                               .data$skill == "B" & .data$evaluation_code == "-" ~ "Poor block", ## negative block touch, either back to opposition or poor on our side
-                               .data$skill == "B" & .data$evaluation_code == "+" ~ "Positive block", ## positive block touch, either to our defense or difficult for opposition
-                               .data$skill == "D" & .data$evaluation_code == "/" ~ "Positive block cover", ## D/ is block cover that gives attacking team a chance to re-attack
-                               .data$skill == "D" & .data$evaluation_code == "!" ~ "Poor block cover", ## block cover that does not give attacking team a chance to re-attack or is an error
-                               .data$skill == "E" & .data$evaluation_code == "/" ~ "Error (reach over net)", ## E/ is a reach
+                               .data$skill == "Block" & .data$evaluation_code == "/" ~ "Poor, opposition to replay",
+                               .data$skill == "Block" & .data$evaluation_code == "!" ~ "Poor, blocking team cannot recover", ## negative block, unplayable to our side
+                               .data$skill == "Block" & .data$evaluation_code == "-" ~ "Poor block", ## negative block touch, either back to opposition or poor on our side
+                               .data$skill == "Block" & .data$evaluation_code == "+" ~ "Positive block", ## positive block touch, either to our defense or difficult for opposition
+                               .data$skill == "Dig" & .data$evaluation_code == "/" ~ "Positive block cover", ## D/ is block cover that gives attacking team a chance to re-attack
+                               .data$skill == "Dig" & .data$evaluation_code == "!" ~ "Poor block cover", ## block cover that does not give attacking team a chance to re-attack or is an error
+                               .data$skill == "Set" & .data$evaluation_code == "/" ~ "Error (reach over net)", ## E/ is a reach
                                TRUE ~ .data$evaluation))
     } else if (style == "german") {
         ## swap B= Error and B/ Invasion
-        out <- mutate(out, evaluation = case_when(.data$skill=="B" & .data$evaluation_code == "/" ~ "Error",
-                                                  .data$skill=="B" & .data$evaluation_code == "=" ~ "Invasion",
+        out <- mutate(out, evaluation = case_when(.data$skill=="Block" & .data$evaluation_code == "/" ~ "Error",
+                                                  .data$skill=="Block" & .data$evaluation_code == "=" ~ "Invasion",
                                                   TRUE ~ .data$evaluation))
     }
     out
