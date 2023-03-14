@@ -35,7 +35,7 @@ dv_file_type <- function(filename, error_on_unknown = FALSE) {
                    chk <- suppressWarnings(tryCatch(readChar(filename, 2), error = function(e) ""))
                    if (identical(chk, "{\"")) "vsm" else "unknown"
                } else if (ext == "xml") {
-                   chk <- readLines(filename, n = 200L)
+                   chk <- readLines(filename, n = 200L, warn = FALSE)
                    if (any(grepl("<ALL_INSTANCES>", chk, fixed = TRUE))) "hxml" else "unknown"
                } else if (ext == "psvb") {
                    chk <- suppressWarnings(tryCatch(readChar(filename, 20), error = function(e) NULL))
