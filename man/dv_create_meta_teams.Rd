@@ -49,7 +49,7 @@ dv_create_meta_teams2(
 
 \item{home_assistant, visiting_assistant}{string: home and visiting assistant coach name}
 
-\item{home_shirt_colour, visiting_shirt_colour}{string: home and visiting shirt colours in "#RRGGBB# format}
+\item{home_shirt_colour, visiting_shirt_colour}{string: home and visiting shirt colours in "#RRGGBB" format}
 }
 \value{
 A tibble
