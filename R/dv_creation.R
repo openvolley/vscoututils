@@ -64,7 +64,7 @@ dv_create_meta_match <- function(date, season, league, phase, home_away, day_num
     home_away <- if (missing(home_away) || is.null(home_away)) NA_character_ else home_away
     day_number <- if (missing(day_number) || is.null(day_number)) NA_integer_ else day_number
     match_number <- if (missing(match_number) || is.null(match_number)) NA_integer_ else match_number
-    tibble(date = date, time = time, season = season, league = league, phase = phase, home_away = home_away, day_number = day_number,
+    tibble(date = date, time = time, season = str_trim(season), league = str_trim(league), phase = str_trim(phase), home_away = str_trim(home_away), day_number = day_number,
            match_number = match_number, text_encoding = "UTF-8", regulation = regulation, zones_or_cones = zones_or_cones, X12 = NA)
 }
 
@@ -83,8 +83,8 @@ dv_create_meta_more <- function(referees, spectators, receipts, city, arena, sco
     city <- if (missing(city) || is.null(city)) NA_character_ else city
     arena <- if (missing(arena) || is.null(arena)) NA_character_ else arena
     scout <- if (missing(scout) || is.null(scout)) NA_character_ else scout
-    tibble(referees = referees, spectators = spectators, receipts = receipts, city = city,
-           arena = arena, scout = scout, X7 = NA, X8 = NA, X9 = NA, X10 = NA, X11 = NA)
+    tibble(referees = str_trim(referees), spectators = str_trim(spectators), receipts = str_trim(receipts), city = str_trim(city),
+           arena = str_trim(arena), scout = str_trim(scout), X7 = NA, X8 = NA, X9 = NA, X10 = NA, X11 = NA)
 }
 
 #' Create the `comments` metadata component of a datavolley object
@@ -99,8 +99,8 @@ dv_create_meta_comments <- function(summary, match_description, home_coach_comme
     match_description <- if (missing(match_description) || is.null(match_description)) NA_character_ else match_description
     home_coach_comments <- if (missing(home_coach_comments) || is.null(home_coach_comments)) NA_character_ else home_coach_comments
     visiting_coach_comments <- if (missing(visiting_coach_comments) || is.null(visiting_coach_comments)) NA_character_ else visiting_coach_comments
-    tibble(comment_1 = summary, comment_2 = match_description, comment_3 = home_coach_comments,
-           comment_4 = visiting_coach_comments, comment_5 = NA_character_)
+    tibble(comment_1 = str_trim(summary), comment_2 = str_trim(match_description), comment_3 = str_trim(home_coach_comments),
+           comment_4 = str_trim(visiting_coach_comments), comment_5 = NA_character_)
 }
 
 #' Create the `result` metadata component of a datavolley object
@@ -145,7 +145,7 @@ dv_create_meta_result <- function(home_team_scores = NA_integer_, visiting_team_
 #' @param home_team,visiting_team string: home and visiting team names
 #' @param home_coach,visiting_coach string: home and visiting coach name
 #' @param home_assistant,visiting_assistant string: home and visiting assistant coach name
-#' @param home_shirt_colour,visiting_shirt_colour string: home and visiting shirt colours in "#RRGGBB# format
+#' @param home_shirt_colour,visiting_shirt_colour string: home and visiting shirt colours in "#RRGGBB" format
 #'
 #' @return A tibble
 #'
@@ -153,6 +153,8 @@ dv_create_meta_result <- function(home_team_scores = NA_integer_, visiting_team_
 dv_create_meta_teams <- function(team_ids, teams, sets_won, coaches, assistants, shirt_colours) {
     assert_that(is.character(team_ids), length(team_ids) == 2, !any(is.na(team_ids)))
     msgs <- c()
+    team_ids <- str_trim(team_ids)
+    teams <- str_trim(teams)
     if (team_ids[1] == team_ids[2]) {
         msgs <- "The two team IDs are identical. They will be modified here but this may still cause problems"
         team_ids <- paste(team_ids, c(" (home)", " (visiting)"))
@@ -163,9 +165,12 @@ dv_create_meta_teams <- function(team_ids, teams, sets_won, coaches, assistants,
         teams <- paste(teams, c(" (home)", " (visiting)"))
     }
     if (missing(sets_won) || length(sets_won) != 2) sets_won <- NA_integer_
-    if (missing(coaches) || length(coaches) != 2) coaches <- NA_integer_
-    if (missing(assistants) || length(assistants) != 2) assistants <- NA_integer_
-    if (missing(shirt_colours) || length(shirt_colours) != 2) shirt_colours <- NA_integer_
+    if (missing(coaches) || length(coaches) != 2) coaches <- NA_character_
+    if (missing(assistants) || length(assistants) != 2) assistants <- NA_character_
+    if (missing(shirt_colours) || length(shirt_colours) != 2) shirt_colours <- NA_character_
+    coaches <- str_trim(coaches)
+    assistants <- str_trim(assistants)
+    shirt_colours <- str_trim(shirt_colours)
     out <- tibble(team_id = team_ids, team = teams, sets_won = sets_won, coach = coaches, assistant = assistants, shirt_colour = shirt_colours,
                   X7 = NA, X8 = NA, X9 = NA, X10 = NA,
                   home_away_team = c("*", "a"),
@@ -198,18 +203,20 @@ dv_create_meta_players <- function(players) {
     assert_that(is.data.frame(players))
     req <- c("lastname", "firstname", "number") ## absolutely required
     if (!all(req %in% names(players))) stop("players data.frame is missing columns: ", paste(setdiff(req, names(players)), collapse = ", "))
+    players$lastname <- str_trim(players$lastname)
+    players$firstname <- str_trim(players$firstname)
     if (!"player_id" %in% names(players)) players$player_id <- make_player_id(players$lastname, players$firstname)
-    players$player_id <- make.unique(players$player_id)
+    players$player_id <- make.unique(str_trim(players$player_id))
     if (!"role" %in% names(players)) players$role <- "unknown"
     if (!"nickname" %in% names(players)) players$nickname <- ""
     if (!"special_role" %in% names(players)) players$special_role <- ""
     ## reset liberos and reassign (but keep e.g. "C" captain)
-    players$special_role <- gsub("L", "", players$special_role)
+    players$special_role <- gsub("L", "", str_trim(players$special_role))
     players$special_role[tolower(players$role) %eq% "libero"] <- paste0(players$special_role[tolower(players$role) %eq% "libero"], "L")
     if (!"foreign" %in% names(players)) players$foreign <- FALSE
     for (nm in paste0("starting_position_set", 1:5)) if (!nm %in% names(players)) players[[nm]] <- NA_character_
     temp <- tibble(X1 = 0L,
-                   number = players$number,
+                   number = as.integer(players$number),
                    X3 = seq_len(nrow(players)),
                    starting_position_set1 = players$starting_position_set1,
                    starting_position_set2 = players$starting_position_set2,
@@ -219,9 +226,9 @@ dv_create_meta_players <- function(players) {
                    player_id = players$player_id,
                    lastname = players$lastname,
                    firstname = players$firstname,
-                   nickname = players$nickname,
+                   nickname = str_trim(players$nickname),
                    special_role = toupper(players$special_role),
-                   role = tolower(players$role),
+                   role = tolower(str_trim(players$role)),
                    foreign = players$foreign)
     temp$X16 <- temp$X17 <- temp$X18 <- temp$X19 <- temp$X20 <- temp$X21 <- temp$X22 <- temp$X23 <- NA
     temp$name <- paste(temp$firstname, temp$lastname)
