@@ -46,11 +46,11 @@ dv_update_meta <- function(x) {
             temp <- do.call(rbind, stringr::str_match_all(set_plays$code, "^[a\\*]p([[:digit:]]+):([[:digit:]]+)"))
             scores <- c(max(as.numeric(temp[, 2]), na.rm = TRUE), max(as.numeric(temp[, 3]), na.rm = TRUE))
             if (is_beach) {
-                if (max(scores) >= 21 && abs(diff(scores)) >= 2) {
+                if (((si < 3 && max(scores) >= 21) || (si > 2 && max(scores) >= 15)) && abs(diff(scores)) >= 2) {
                     sets_won[which.max(scores)] <- sets_won[which.max(scores)] + 1L
                 }
             } else {
-                if ((si < 5 && max(scores) >= 25 && abs(diff(scores)) >= 2) || max(scores) >= 15 && abs(diff(scores)) >= 2) {
+                if (((si < 5 && max(scores) >= 25) || (si > 4 && max(scores) >= 15)) && abs(diff(scores)) >= 2) {
                     sets_won[which.max(scores)] <- sets_won[which.max(scores)] + 1L
                 }
             }
