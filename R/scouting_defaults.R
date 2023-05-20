@@ -78,7 +78,7 @@ dv_default_attack_combos <- function(data_type = "indoor", style = "default", si
                        "X2", 4, "R", "M", "Standard left", NA, "#FF0000", 4929, "-", ## dv_xy2index(sx$L, sy$X)
                        "X3", 3, "C", "M", "Standard middle", NA, "#FF0000", 4951, "-", ## dv_xy2index(sx$M, sy$X)
                        "X4", 2, "L", "M", "Standard right", NA, "#FF0000", 4972, "-", ## dv_xy2index(sx$R, sy$X)
-                       "X5", 2, "L", "M", "Satndard far right", NA, "#FF0000", 4988, "-", ## dv_xy2index(sx$FR, sy$X)
+                       "X5", 2, "L", "M", "Standard far right", NA, "#FF0000", 4988, "-", ## dv_xy2index(sx$FR, sy$X)
                        "V1", 4, "R", "H", "Away far left", NA, "#00FF00", 4113, "-", ## dv_xy2index(sx$FL, sy$V)
                        "V2", 4, "R", "H", "Away left", NA, "#00FF00", 4129, "-", ## dv_xy2index(sx$L, sy$V)
                        "V3", 3, "C", "H", "Away middle", NA, "#00FF00", 4151, "-", ## dv_xy2index(sx$M, sy$V)
