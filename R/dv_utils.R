@@ -39,8 +39,13 @@ dv_update_meta <- function(x) {
             x$meta$result$score_home_team[si] <- scores[1]
             x$meta$result$score_visiting_team[si] <- scores[2]
             ## duration
-            set_start_end_time <- range(set_plays$video_time, na.rm = TRUE)
-            x$meta$result$duration[si] <- if (any(is.infinite(set_start_end_time))) NA_real_ else round(diff(set_start_end_time) / 60)
+            set_start_end_time <- if (!all(is.na(set_plays$video_time))) range(set_plays$video_time, na.rm = TRUE) else NA_real_
+            thisdur <- x$meta$result$duration[si]
+            ## if the existing duration is non-NA and looks valid, keep it
+            if (is.na(thisdur) || thisdur < 1 || thisdur > 60) {
+                ## otherwise attempt to re-generate it from video times
+                x$meta$result$duration[si] <- if (any(is.infinite(set_start_end_time) | is.na(set_start_end_time))) NA_real_ else round(diff(set_start_end_time) / 60)
+            }
             ## sets won
             ## need scores at end of points
             temp <- do.call(rbind, stringr::str_match_all(set_plays$code, "^[a\\*]p([[:digit:]]+):([[:digit:]]+)"))
