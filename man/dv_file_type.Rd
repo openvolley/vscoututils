@@ -2,14 +2,19 @@
 % Please edit documentation in R/filetype.R
 \name{dv_file_type}
 \alias{dv_file_type}
+\alias{dv_file_data_type}
 \title{Detect scout file type}
 \usage{
 dv_file_type(filename, error_on_unknown = FALSE)
+
+dv_file_data_type(x, error_on_unknown = FALSE)
 }
 \arguments{
 \item{filename}{character: paths to files. Files that do not exist will be classified as "unknown" type}
 
 \item{error_on_unknown}{logical: if \code{TRUE} an error will be thrown if an unknown file type is encountered}
+
+\item{x}{character: a character vector with the contents of a scout file}
 }
 \value{
 Character vector containing:
@@ -22,14 +27,23 @@ Character vector containing:
 }
 }
 \description{
-Returns the general file type (format), but does not differentiate e.g. indoor from beach. Type is based on the file extension and a minimal check of the contents, but without fully parsing the file.
+Returns the general file type (format), but does not differentiate e.g. indoor from beach. Type is based on the file extension and a minimal check of the contents, but without fully parsing the file. For \code{dv_file_data_type} the type is based only on a minimal check of the contents (provided in \code{x})
 }
 \examples{
 \dontrun{
   library(ovdata)
   dv_file_type(ovdata_example("190301_kats_beds")) ## dvw
+  x <- readLines(ovdata_example("190301_kats_beds"), warn = FALSE)
+  dv_file_data_type(x)
+
   dv_file_type(ovdata_example("clickscout")) ## dvw
+  dv_file_data_type(readLines(ovdata_example("clickscout"), warn = FALSE))
+
   dv_file_type(ovdata_example("2017_AVL_mens_HEAT_vs_UTSSU")) ## psvb
+  dv_file_data_type(readLines(ovdata_example("2017_AVL_mens_HEAT_vs_UTSSU"), warn = FALSE))
+
   dv_file_type(tempfile(fileext = ".dvw")) ## unknown (contents not as expected for dvw)
+  dv_file_data_type(readLines(tempfile(fileext = ".dvw"))) ## "unknown", with warning
+
 }
 }
