@@ -12,6 +12,7 @@
 #' * player_out, player_in (substitions)
 #' and optional columns:
 #' * player_number, skill (one-character code), skill_type_code, evaluation_code (used to rebuild the codes before calling [dv_green_codes()]
+#' @param last_home_setter,last_visiting_setter integer: home and visiting setter jersey numbers in the previous rally
 #' @param last_home_setter_position,last_visiting_setter_position integer: home and visiting setter positions in the previous rally
 #' @param last_home_team_score,last_visiting_team_score integer: home and visiting team scores at the end of the previous rally
 #' @param keepcols character: names of the columns in `rx` to keep, when inserting new rows. Values in these columns will be copied from an adjacent row. If `keepcols` is not provided, a guess will be made
@@ -22,7 +23,7 @@
 #' @return `rx` potentially with additional rows inserted. Note that the added rows might have fractional `point_id` values, in which case you will need to renumber all `point_id`s in the match to integers afterwards
 #'
 #' @export
-dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_setter_position, last_home_team_score, last_visiting_team_score, keepcols, meta, rebuild_codes = TRUE, do_warn = TRUE) {
+dv_expand_rally_codes <- function(rx, last_home_setter_position, last_home_setter, last_visiting_setter_position, last_visiting_setter, last_home_team_score, last_visiting_team_score, keepcols, meta, rebuild_codes = TRUE, do_warn = TRUE) {
     assert_that(is.data.frame(rx))
     if (nrow(rx) < 1) return(rx)
     req <- c("point_id", "code", "team", "point", "substitution", "timeout", "home_setter_position", "visiting_setter_position", "home_team_score", "visiting_team_score")
@@ -129,9 +130,17 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_visiting_s
         }
     }
     ## insert setter position codes, when setter has changed position (and not on first point, those come in the >LUp codes - so for the first point, make sure that the last_home_setter_position and last_visiting_setter_position are passed as their starting values)
-    spcodes <- if (!rx$home_setter_position[1] %eq% last_home_setter_position) paste0("*z", rx$home_setter_position[1]) else c()
-    if (!rx$visiting_setter_position[1] %eq% last_visiting_setter_position) spcodes <- c(spcodes, paste0("az", rx$visiting_setter_position[1]))
+    ## insert *P if the setter has changed, based on last_home_setter
+    hs <- rx[[paste0("home_p", rx$home_setter_position[1])]][1] ## home setter now
+    vs <- rx[[paste0("visiting_p", rx$visiting_setter_position[1])]][1] ## visiting setter now
+    spcodes <- c(if (!hs %eq% last_home_setter) paste0("*P", lead0(hs)), if (!rx$home_setter_position[1] %eq% last_home_setter_position) paste0("*z", rx$home_setter_position[1]),
+                 if (!vs %eq% last_visiting_setter) paste0("aP", lead0(vs)), if (!rx$visiting_setter_position[1] %eq% last_visiting_setter_position) paste0("az", rx$visiting_setter_position[1]))
     if (length(spcodes) > 0) rx <- bind_rows(rx[rep(1, length(spcodes)), keepcols] %>% mutate(team = substr(spcodes, 1, 1), point = FALSE, code = spcodes), rx)
+    ## now we might have ended up with multiple "*P" or "aP" codes - keep only the last
+    tempidx <- grep("^\\*P", rx$code)
+    if (length(tempidx) > 1) rx <- rx[-head(tempidx, -1), ] ## drop all but the last *P code
+    tempidx <- grep("^aP", rx$code)
+    if (length(tempidx) > 1) rx <- rx[-head(tempidx, -1), ] ## drop all but the last aP code
     rx
 }
 

@@ -7,7 +7,9 @@
 dv_expand_rally_codes(
   rx,
   last_home_setter_position,
+  last_home_setter,
   last_visiting_setter_position,
+  last_visiting_setter,
   last_home_team_score,
   last_visiting_team_score,
   keepcols,
@@ -27,6 +29,8 @@ and optional columns:
 }}
 
 \item{last_home_setter_position, last_visiting_setter_position}{integer: home and visiting setter positions in the previous rally}
+
+\item{last_home_setter, last_visiting_setter}{integer: home and visiting setter jersey numbers in the previous rally}
 
 \item{last_home_team_score, last_visiting_team_score}{integer: home and visiting team scores at the end of the previous rally}
 
