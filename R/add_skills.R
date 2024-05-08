@@ -20,7 +20,7 @@ dv_insert_sets_check <- function(x, no_set_attacks = c("PP", "P2", "PR"), phase_
 #' @param no_set_attacks character: vector of attack codes for which we will not automatically insert sets (e.g. setter tips, overpass attacks)
 #' @param phase_select character: play phase(s) of attacks to consider. One or more of "Reception", "Transition"
 #' @param default_set_evaluation string: the default evaluation code for a set (used unless the attack was against 0 or 1 blockers, in which case it gets "#")
-#' @param set_call_table data.frame: a data.frame with columns `attack_code` and `set_call`. Setter calls will be added to sets associated with attack codes in this list. Note that setter calls from this table will NOT be inserted on sets where the setter did not set the middle hitter (e.g. if the middle ran X1 but the setter set someone else, no "K1" call can be inserted because there is no way of knowing what the middle was running). A "KK" setter call (representing "unknown setter call") will be inserted on any attack made from a perfect, positive, or OK pass (but not in transition, only on reception attacks). This gives a biased set of setter call entries that are unlikely to be useful for analysis purposes. It is therefore recommended that you provide `set_call_table` to this function ONLY if you are then going to manually insert setter calls on the remaining rows
+#' @param set_call_table data.frame: a data.frame with columns `attack_code` and `set_call`. Setter calls will be added to sets associated with attack codes in this list. Note that setter calls from this table will NOT be inserted on sets where the setter did not set the middle hitter (e.g. if the middle ran X1 but the setter set someone else, no "K1" call can be inserted because there is no way of knowing what the middle was running). This gives a biased set of setter call entries that are unlikely to be useful for analysis purposes. It is therefore recommended that you provide `set_call_table` to this function ONLY if you are then going to manually insert setter calls on the remaining rows
 #' @param attack_rows integer: a vector of row numbers of attacks for which sets should be inserted. Automatically calculated if not provided
 #'
 #' @return A modified copy of `x`
@@ -37,7 +37,6 @@ dv_insert_sets_check <- function(x, no_set_attacks = c("PP", "P2", "PR"), phase_
 dv_insert_sets <- function(x, no_set_attacks = c("PP", "P2", "PR"), phase_select = "Reception", default_set_evaluation = "+", attack_rows, set_call_table) {
     if (missing(attack_rows) || is.null(attack_rows)) attack_rows <- dv_insert_sets_check(x, no_set_attacks = no_set_attacks, phase_select = phase_select)
     if (length(attack_rows) < 1) return(x)
-    if (missing(set_call_table) || is.null(set_call_table)) set_call_table <- data.frame(attack_code = c("X1", "X2", "X7"), set_call = c("K1", "K2", "K7"))
     set_data <- x$plays %>% mutate(passQ = case_when(lag(.data$skill) == "Reception" ~ lag(.data$evaluation)),
                                    digQ = case_when(lag(.data$skill) == "Dig" ~ lag(.data$evaluation)))
     set_data <- set_data[attack_rows, ] %>%
@@ -66,10 +65,11 @@ dv_insert_sets <- function(x, no_set_attacks = c("PP", "P2", "PR"), phase_select
 
     ## setter calls
     tempsc <- rep("~~", length(set_scout_code)) ## default (no) setter call
-    if (is.data.frame(set_call_table) && nrow(set_call_table) > 0 && all(c("attack_code", "set_call") %in% names(set_call_table))) {
+    if (!missing(set_call_table) && is.data.frame(set_call_table) && nrow(set_call_table) > 0 && all(c("attack_code", "set_call") %in% names(set_call_table))) {
         set_call_table$set_call <- enforce_width(set_call_table$set_call, width = 2)
         for (sci in seq_len(nrow(set_call_table))) tempsc[which(set_data$attack_code == set_call_table$attack_code[sci])] <- set_call_table$set_call[sci]
-        tempsc[grepl("^(Perfect|Positive|OK)", set_data$passQ) & tempsc %eq% "~~"] <- "KK"
+        ## previously added "KK"("unknown") setter calls where pass was reasonable but the setter did not set the middle
+        ##tempsc[grepl("^(Perfect|Positive|OK)", set_data$passQ) & tempsc %eq% "~~"] <- "KK"
     }
     set_scout_code <- paste0(set_scout_code, tempsc)
 
