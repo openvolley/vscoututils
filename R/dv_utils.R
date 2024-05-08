@@ -109,3 +109,21 @@ dv_update_meta <- function(x) {
     x
 }
 
+#' Extract player metadata by team and jersey number
+#'
+#' @param team character: vector of "*" or "a"
+#' @param number integer: vector of player jersey numbers
+#' @param meta list: the `meta` component of a datavolley object, or a datavolley object
+#'
+#' @return A data frame with columns "team" and plus those in `meta`, sorted to match the inputs `team` and `number`
+#'
+# @examples
+#' @export
+dv_get_player_meta <- function(team, number, meta) {
+    stopifnot(all(team %in% c("*", "a")))
+    if (is.list(meta) && "meta" %in% names(meta)) meta <- meta$meta
+    out <- tibble(team = team, number = number) %>% mutate(.row_number = row_number())
+    bind_rows(out %>% dplyr::filter(.data$team == "*") %>% left_join(meta$players_h, by = "number"),
+              out %>% dplyr::filter(.data$team == "a") %>% left_join(meta$players_v, by = "number")) %>%
+        dplyr::arrange(.data$.row_number) %>% dplyr::select(-".row_number")
+}
