@@ -15,6 +15,15 @@ check_id <- function(z) {
 
 `%eq%` <- function(x,y) x==y & !is.na(x) & !is.na(y)
 
+## leading zeros on numbers, e.g. jersey numbers
+ldz <- function(nn, width = 2) formatC(suppressWarnings(as.integer(nn)), flag = "0", width = width)
+## same but forcing NAs, negative numbers, and numbers > 99 to "00"
+ldz2 <- function(n, width = 2) {
+    z <- suppressWarnings(as.integer(n))
+    z[is.na(z) | z < 0 | z > 99] <- 0L
+    formatC(z, flag = "0", width = width)
+}
+
 ## Accumulate messages for later display
 ## Internal function, not exported
 ## severity: 1=critical, 2=informative, may lead to misinterpretation of data, 3=minor, esp. those that might have resulted from selective post-processing of combo codes

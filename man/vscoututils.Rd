@@ -2,8 +2,18 @@
 % Please edit documentation in R/vscoututils-package.R
 \docType{package}
 \name{vscoututils}
+\alias{vscoututils-package}
 \alias{vscoututils}
 \title{\pkg{vscoututils}}
 \description{
 Utility Functions for Volleyball Scout Files
+}
+\author{
+\strong{Maintainer}: Ben Raymond \email{ben@untan.gl}
+
+Authors:
+\itemize{
+  \item Adrien Ickowicz
+}
+
 }
