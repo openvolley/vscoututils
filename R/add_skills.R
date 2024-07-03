@@ -75,7 +75,7 @@ dv_insert_sets <- function(x, no_set_attacks = c("PP", "P2", "PR"), phase_select
 
     ## populate the target attacker using the x$meta$attacks table
     temp_tgt <- rep("~", length(set_scout_code))
-    if (nrow(x$meta$attacks) > 0 && all(c("code", "attacker_position", "set_type") %in% names(x$meta$attacks))) {
+    if (!is.null(x$meta$attacks) && nrow(x$meta$attacks) > 0 && all(c("code", "attacker_position", "set_type") %in% names(x$meta$attacks))) {
         for (ai in seq_len(nrow(x$meta$attacks))) {
             idx <- which(set_data$attack_code == x$meta$attacks$code[ai])
             if (length(idx) > 0) {
