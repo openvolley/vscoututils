@@ -11,7 +11,7 @@ dv_insert_sets_check(
 )
 }
 \arguments{
-\item{x}{datavolley: datavolley object as returned by \code{\link[datavolley:read_dv]{datavolley::dv_read()}}}
+\item{x}{datavolley: datavolley object as returned by \code{\link[datavolley:dv_read]{datavolley::dv_read()}}}
 
 \item{no_set_attacks}{character: vector of attack codes for which we will not automatically insert sets (e.g. setter tips, overpass attacks)}
 

@@ -20,6 +20,10 @@ dv_update_meta <- function(x) {
     if (nrow(x$meta$result) < length(set_start_rows)) {
         temp <- length(set_start_rows) - nrow(x$meta$result)
         x$meta$result <- bind_rows(x$meta$result, tibble(played = rep(NA, temp), score_intermediate1 = rep(NA_character_, temp), score_intermediate2 = rep(NA_character_, temp), score_intermediate3 = rep(NA_character_, temp), score = rep(NA_character_, temp), duration = rep(NA_real_, temp), X7 = rep(NA, temp), score_home_team = rep(NA_real_, temp), score_visiting_team = rep(NA_real_, temp)))
+    } else if (nrow(x$meta$result) > length(set_start_rows)) {
+        ## we have more rows in x$meta$result than actual sets
+        to_drop <- which(seq_len(nrow(x$meta$result)) > length(set_start_rows) & is.na(x$meta$result$score_home_team) & is.na(x$meta$result$score_visiting_team))
+        x$meta$result <- x$meta$result[setdiff(seq_len(nrow(x$meta$result)), to_drop), ]
     }
     x$meta$result$played[seq_along(set_start_rows)] <- TRUE
     set_end_rows <- grep("^\\*\\*[[:digit:]]set", x$plays$code)
