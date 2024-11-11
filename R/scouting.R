@@ -110,7 +110,7 @@ dv_expand_rally_codes <- function(rx, last_home_setter_position, last_home_sette
         rx <- rx[rep(1L, length(newcodes)), keepcols] %>% mutate(team = substr(newcodes, 1, 1), point_id = temp_point_ids, point = substr(newcodes, 2, 2) == "p", code = newcodes, home_team_score = newscores_h, visiting_team_score = newscores_v, substitution = FALSE, timeout = FALSE)
     } else if (is_point) {
         ## add green codes
-        if (!all(rx$team %in% c("a", "*"))) {
+        if (!all(grepl("^>", rx$code) | rx$team %in% c("a", "*"))) {
             stop("not all team values in rx are '*' or 'a'")
         }
         ss1 <- function(x) case_when(!is.na(x) & nzchar(x) ~ substr(x, 1, 1), TRUE ~ "~")
