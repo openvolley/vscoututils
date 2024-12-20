@@ -39,7 +39,19 @@ dv_file_type <- function(filename, error_on_unknown = FALSE) {
         out <- if (!ext %in% c("dvw", "vsm", "xml", "psvb")) {
                    "unknown"
                } else if (ext == "dvw") {
-                   chk <- tryCatch(readLines(filename, warn = FALSE, n = 1L), error = function(e) "")
+                   chk <- tryCatch({
+                       this <- readLines(filename, warn = FALSE, n = 1L)
+                       if (grepl("^$", this, useBytes = TRUE)) {
+                           ## empty first line
+                           ## some files have a wacky string of 0x00 bytes at the start, which means that the first line is empty (should be "[3DATAVOLLEYSCOUT]")
+                           this <- tryCatch(readLines(filename, warn = FALSE, n = 40L), error = function(e) "")
+                           if (grepl("^$", this[1], useBytes = TRUE) && length(grep("[3MATCH]", this, useBytes = TRUE, fixed = TRUE)) == 1 &&
+                               length(grep("[3TEAMS]", this, useBytes = TRUE, fixed = TRUE)) == 1 && !any(grepl("[3DATAVOLLEYSCOUT]", this, useBytes = TRUE, fixed = TRUE))) {
+                               this[1] <- "[3DATAVOLLEYSCOUT]"
+                           }
+                       }
+                       this
+                   }, error = function(e) "")
                    if_is(dv_file_data_type(chk), "dvw")
                } else if (ext == "vsm") {
                    ## minimal check that this is a json file, without actually parsing it
@@ -65,7 +77,7 @@ dv_file_type <- function(filename, error_on_unknown = FALSE) {
 #' @export
 dv_file_data_type <- function(x, error_on_unknown = FALSE) {
     tryCatch({
-        if (grepl("[3DATAVOLLEYSCOUT]", x[1], fixed = TRUE)) {
+        if (grepl("[3DATAVOLLEYSCOUT]", x[1], fixed = TRUE, useBytes = TRUE)) {
             "dvw"
         } else if (identical(substr(x[1], 1, 2), "{\"") && any(grepl("gameType", x), na.rm = TRUE)) {
             ## minimal check that this is a json file, without actually parsing it
