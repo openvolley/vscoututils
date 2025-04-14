@@ -79,7 +79,7 @@ dv_file_data_type <- function(x, error_on_unknown = FALSE) {
     tryCatch({
         if (grepl("[3DATAVOLLEYSCOUT]", x[1], fixed = TRUE, useBytes = TRUE)) {
             "dvw"
-        } else if (identical(substr(x[1], 1, 2), "{\"") && any(grepl("gameType", x), na.rm = TRUE)) {
+        } else if (identical(substr(str_trim(x[1]), 1, 1), "{") && any(grepl("gameType", x), na.rm = TRUE)) {
             ## minimal check that this is a json file, without actually parsing it
             "vsm"
         } else if (any(grepl("<ALL_INSTANCES>", x, fixed = TRUE), na.rm = TRUE)) {
