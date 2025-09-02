@@ -119,12 +119,14 @@ dv_create_meta_comments <- function(summary, match_description, home_coach_comme
 #'
 #' @export
 dv_create_meta_result <- function(home_team_scores = NA_integer_, visiting_team_scores = NA_integer_, durations = NA_integer_) {##, score_intermediate1, score_intermediate2, score_intermediate3) {
+    if (length(home_team_scores) < 1) home_team_scores <- NA_integer_ ## fallback, but really this is a bit meaningless if no score is provided
+    if (length(visiting_team_scores) < 1) visiting_team_scores <- NA_integer_
     assert_that(length(home_team_scores) == length(visiting_team_scores))
     assert_that(length(durations) == 1 || length(durations) == length(home_team_scores))
     ## mostly NAs, to be populated by dv_update_meta
     tibble(played = TRUE,
            score_intermediate1 = NA_character_, score_intermediate2 = NA_character_, score_intermediate3 = NA_character_,
-           score = if (!all(is.na(home_team_scores))) paste0(home_team_scores, "-", visiting_team_scores),
+           score = if (!all(is.na(home_team_scores))) paste0(home_team_scores, "-", visiting_team_scores) else NA_character_,
            duration = durations,
            X7 = NA,
            score_home_team = home_team_scores, score_visiting_team = visiting_team_scores)
