@@ -54,23 +54,59 @@ dv_update_meta <- function(x) {
             ## need scores at end of points
             temp <- do.call(rbind, stringr::str_match_all(set_plays$code, "^[a\\*]p([[:digit:]]+):([[:digit:]]+)"))
             scores <- c(max(as.numeric(temp[, 2]), na.rm = TRUE), max(as.numeric(temp[, 3]), na.rm = TRUE))
-            if (is_beach) {
-                if (((si < 3 && max(scores) >= 21) || (si > 2 && max(scores) >= 15)) && abs(diff(scores)) >= 2) {
-                    sets_won[which.max(scores)] <- sets_won[which.max(scores)] + 1L
-                }
+            set_was_completed <- FALSE
+            if (isTRUE(any(grepl("^\\*\\*[[:digit:]]set", set_plays$code, ignore.case = TRUE), na.rm = TRUE))) {
+                ## we have an end-of-set marker, so take the team that had the highest score as the winner
+                sets_won[which.max(scores)] <- sets_won[which.max(scores)] + 1L
+                set_was_completed <- TRUE
             } else {
-                if (((si < 5 && max(scores) >= 25) || (si > 4 && max(scores) >= 15)) && abs(diff(scores)) >= 2) {
-                    sets_won[which.max(scores)] <- sets_won[which.max(scores)] + 1L
+                ## no end-of-set marker, but we can't be sure if the set is incomplete or the marker is just missing. If scores are such that the set would be complete, assume it was
+                if (is_beach) {
+                    if (((si < 3 && max(scores) >= 21) || (si > 2 && max(scores) >= 15)) && abs(diff(scores)) >= 2) {
+                        sets_won[which.max(scores)] <- sets_won[which.max(scores)] + 1L
+                        set_was_completed <- TRUE
+                    }
+                } else {
+                    if (((si < 5 && max(scores) >= 25) || (si > 4 && max(scores) >= 15)) && abs(diff(scores)) >= 2) {
+                        sets_won[which.max(scores)] <- sets_won[which.max(scores)] + 1L
+                        set_was_completed <- TRUE
+                    }
                 }
             }
-            iss <- if (is_beach) c(5, 10, 15) else if (si >= 5) c(5, 10, 12) else c(8, 16, 21) ## intermediate score levels
+            ## intermediate score levels
+            ## these won't always be correct if sets are played to non-standard scores (e.g. Aus AVSL plays all sets to 18 points) but it's not immediately obvious how to allow for that
+            iss <- if (is_beach) {
+                       c(5, 10, 15)
+                   } else {
+                       ## indoor
+                       if (si >= 5) {
+                           ## 5th set
+                           if (max(scores) < 15 && set_was_completed) {
+                               ## possibly non-standard regs, scores to less than 15
+                               round(max(scores) * c(0.33, 0.66, 0.83))
+                           } else {
+                               c(5, 10, 12) ## default, standard regs
+                           }
+                       } else {
+                           if (max(scores) < 25 && set_was_completed) {
+                               ## possibly non-standard regs, scores to less than 25
+                               round(max(scores) * c(0.33, 0.66, 0.83))
+                           } else {
+                               c(8, 16, 21) ## default, standard regs
+                           }
+                       }
+                   }
             for (issi in seq_along(iss)) {
-                idx <- which(set_plays$home_score_start_of_point == iss[issi] | set_plays$visiting_score_start_of_point == iss[issi])
+                idx <- which(set_plays$home_score_start_of_point >= iss[issi] | set_plays$visiting_score_start_of_point >= iss[issi])
                 if (length(idx) > 0) {
                     idx <- min(idx)
                     if (!is.na(set_plays$home_score_start_of_point[idx]) && !is.na(set_plays$visiting_score_start_of_point[idx])) {
                         x$meta$result[[paste0("score_intermediate", issi)]][si] <- paste0(set_plays$home_score_start_of_point[idx], "-", set_plays$visiting_score_start_of_point[idx])
+                    } else {
+                        x$meta$result[[paste0("score_intermediate", issi)]][si] <- NA_character_
                     }
+                } else {
+                    x$meta$result[[paste0("score_intermediate", issi)]][si] <- NA_character_
                 }
             }
         }
