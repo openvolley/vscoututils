@@ -133,6 +133,8 @@ dv_update_meta <- function(x) {
                 pl_row <- which(x$meta$players_v$number == visiting_starting_lineup[j])
                 if (length(pl_row) == 1) x$meta$players_v[[paste0("starting_position_set", si)]][pl_row] <- as.character(j)
             }
+        } else {
+            home_starting_lineup <- visiting_starting_lineup <- NULL
         }
         ## subs
         all_home_pl <- unique(na.omit(as.numeric(unlist(x$plays[which(x$plays$set_number == si & !grepl("^(>LUp|\\*\\*[[:digit:]]set)", x$plays$code, ignore.case = TRUE)), paste0("home_p", pseq)]))))
