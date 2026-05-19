@@ -297,7 +297,7 @@ dv_create_meta_attack_combos <- function(code, start_zone, side = NA_character_,
 #' @param code character: vector of two-character (uppercase) setter call codes. Setter call codes must start with K
 #' @param description character: vector of setter call descriptions
 #' @param colour character: vector of colour codes (maybe) used when plotting, in "#RRGGBB" format
-#' @param start_coordinate,mid_coordinate,end_coordinate integer: vector of start/mid/end locations as single-index coordinates (see e.g. `datavolley:dv_xy2index`)
+#' @param start_coordinate,mid_coordinate,end_coordinate integer: vector of start/mid/end locations as single-index coordinates (see e.g. `datavolley::dv_xy2index`)
 #' @param path character: vector of paths, each a comma-separated list of single-index coordinates
 #' @param path_colour character: vector of colour codes in "#RRGGBB" format
 #'

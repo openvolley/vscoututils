@@ -14,4 +14,8 @@ test_that("decoding works", {
     expect_equal(dv_decode_special_code("Attack", "C", "Positive, good attack"), "Block control")
     ## this is invalid everywhere
     expect_true(grepl("Unknown", dv_decode_special_code("Attack", "Q", "Positive, good attack")))
+
+    expect_equal(dv_decode_skill_type("Serve", "T"), "Topspin serve")
+    expect_equal(dv_decode_skill_type("Serve", "T", style = "german"), "Jump serve")
+    expect_error(dv_decode_skill_type("Serve", "T", style = "foobar"))
 })

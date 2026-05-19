@@ -13,7 +13,7 @@
 dv_default_attack_combos <- function(data_type = "indoor", style = "default", simplified = TRUE) {
     ##data_type <- match.arg(data_type, c("indoor", "beach"))
     data_type <- match.arg(data_type, c("indoor", "beach"))
-    style <- match.arg(style, .dv_default_styles)
+    style <- match.arg(style, c(.dv_default_styles, if (data_type == "beach") "usa"))
     out <- if (data_type == "indoor") {
                tribble(~code, ~attacker_position, ~side, ~type, ~description, ~X6, ~colour, ~start_coordinate, ~set_type,
                        "CB", 2, "L", "N", "Slide next to setter", NA, 16711680, 4976, "C",
@@ -184,14 +184,25 @@ dv_default_winning_symbols <- function(data_type = "indoor", style = "default") 
 dv_default_scouting_table <- function(data_type = "indoor", style = "default") {
     data_type <- match.arg(data_type, c("indoor", "beach"))
     style <- match.arg(style, .dv_default_styles)
-    tribble(~skill, ~default_skill, ~skill_type, ~evaluation_code,
-            "S", FALSE, "H", "+",
-            "R", FALSE, "H", "+",
-            "A", FALSE, "H", "+",
-            "B", FALSE, "H", "+",
-            "D", TRUE, "H", "+",
-            "E", FALSE, "H", "+",
-            "F", FALSE, "H", "+")
+    if (style == "german") {
+        tribble(~skill, ~default_skill, ~skill_type, ~evaluation_code,
+                "S", FALSE, "M", "+",
+                "R", FALSE, "M", "+",
+                "A", FALSE, "H", "-",
+                "B", FALSE, "H", "+",
+                "D", TRUE, "H", "-",
+                "E", FALSE, "H", "+",
+                "F", FALSE, "H", "+")
+    } else {
+        tribble(~skill, ~default_skill, ~skill_type, ~evaluation_code,
+                "S", FALSE, "H", "+",
+                "R", FALSE, "H", "+",
+                "A", FALSE, "H", "+",
+                "B", FALSE, "H", "+",
+                "D", TRUE, "H", "+",
+                "E", FALSE, "H", "+",
+                "F", FALSE, "H", "+")
+    }
 }
 
 
@@ -293,6 +304,12 @@ dv_default_skill_types <- function(data_type = "indoor", style = "default") {
                       "Serve", "T", "Jump-float serve",
                       "Serve", "M", "Jump-float serve",
                       "Serve", "H", "Standing serve")
+          } else if (style == "german") {
+              tribble(~skill, ~skill_type_code, ~skill_type,
+                      "Serve", "Q", "Jump serve", ## "Power jump"
+                      "Serve", "M", "Jump-float serve",
+                      "Serve", "H", "Float serve",
+                      "Serve", "T", "Jump serve") ## "Drive jump (short)" serve
           } else {
               ## standard indoor
               ## also perhaps N = hybrid
@@ -388,6 +405,7 @@ dv_default_skill_evaluations <- function(data_type = "indoor", style = "default"
         ## swap B= Error and B/ Invasion
         out <- mutate(out, evaluation = case_when(.data$skill=="Block" & .data$evaluation_code == "/" ~ "Error",
                                                   .data$skill=="Block" & .data$evaluation_code == "=" ~ "Invasion",
+                                                  .data$skill=="Block" & .data$evaluation_code == "-" ~ "Poor block",
                                                   TRUE ~ .data$evaluation))
     }
     out

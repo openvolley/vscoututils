@@ -22,7 +22,7 @@ dv_create_meta_setter_calls(
 
 \item{colour}{character: vector of colour codes (maybe) used when plotting, in "#RRGGBB" format}
 
-\item{start_coordinate, mid_coordinate, end_coordinate}{integer: vector of start/mid/end locations as single-index coordinates (see e.g. \code{datavolley:dv_xy2index})}
+\item{start_coordinate, mid_coordinate, end_coordinate}{integer: vector of start/mid/end locations as single-index coordinates (see e.g. \code{datavolley::dv_xy2index})}
 
 \item{path}{character: vector of paths, each a comma-separated list of single-index coordinates}
 
